@@ -24,9 +24,9 @@ class MOMCTSSampler:
         function = SampleTrimmer.sample_to_function(code, self._template_program)
         if thought is None or function is None:
             return thought, function
-        # prompt2 = self.get_prompt_refine(task_description, thought, str(function))
-        # describe = self.llm.draw_sample(prompt2)
-        return thought, function
+        prompt2 = self.get_prompt_refine(task_description, thought, str(function))
+        describe = self.llm.draw_sample(prompt2)
+        return describe, function
 
     def get_prompt_refine(self, task_prompt: str, idea: str, code: str):
         prompt_content = task_prompt + "\n" + "Following is the Design Idea of a heuristic algorithm for the problem and the code for implementing the heuristic algorithm.\n"

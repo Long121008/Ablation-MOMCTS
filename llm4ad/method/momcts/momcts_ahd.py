@@ -422,7 +422,7 @@ class MOMCTS_AHD:
         elif option == 'elitist':
             i = 0
             while i < 3:  # Retries giới hạn để flash
-                elites = self.population_management_s1(self._population.population, size=5)  
+                elites = self.population_management_s1(self._population.population, size=5) # survival is enough 
                 if len(elites) < 2:
                     print("Not enough elites for elitist action.")
                     return node_set
@@ -466,7 +466,7 @@ class MOMCTS_AHD:
                 else:
                     # Check if discovered (better than best in elites)
                     best_score = elites[0].score
-                    if np.all(func.score > best_score):  # Adjust comparator if minimizing
+                    if np.all(func.score < best_score):  # Adjust comparator if minimizing
                         self.good_reflections.append(long_term_guide)
                     else:
                         self.bad_reflections.append(long_term_guide)
@@ -612,7 +612,7 @@ class MOMCTS_AHD:
 
         # evolutionary search
         n_op = ['e1', 'e2', 'm1', 'm2', 's1', 'elitist']  # Thêm 'elitist'
-        op_weights = [1, 1, 1, 1, 1, 2]  # Weight cao hơn cho elitist để ưu tiên develop elites
+        op_weights = [0, 1, 1, 1, 1, 1]  # Weight cao hơn cho elitist để ưu tiên develop elites
         while self._continue_loop():  # if current evaluation < max evaluation, still evaluate function
             node_set = []
             print(
@@ -638,12 +638,6 @@ class MOMCTS_AHD:
 
                 cur_node = next_node
             
-            # short-term reflection
-            self._perform_short_term_reflection(cur_node)
-            
-            # long-term reflection
-            if self._tot_sample_nums % 10 == 0 and self._tot_sample_nums > 0:
-                self._perform_long_term_reflection()
 
             tasks = []
             for i in range(len(n_op)):
