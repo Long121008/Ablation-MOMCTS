@@ -33,9 +33,9 @@ class MOMCTS_AHD:
                  selection_num: int = 2,
                  num_samplers: int = 4,  # the number of threads to sample in parallel
                  num_evaluators: int = 4,
-                 alpha: float = 0.3,
+                 alpha: float = 0.5,
                  lambda_0: float = 0.1,
-                 review = True,
+                 review = False,
                  *,
                  resume_mode: bool = False,
                  debug_mode: bool = False,
@@ -183,7 +183,7 @@ class MOMCTS_AHD:
             )
             sample_time = time.time() - sample_start
 
-            if thought is None or func is None:
+            if func is None:
                 print("New return in _sample_evaluate_register, momcts_ahd.py")
                 return False
 
@@ -244,19 +244,19 @@ class MOMCTS_AHD:
         return False
 
     # add tree path for reasoning s1
-    def population_management_s1(self, pop_input, size):
+    def population_management_s1(self, pop_input, size=None):
         """
         Args:
             pop_input: list of individuals (each with .score attribute)
-            size: desired population size
+            size: optional, desired population size (ignored if larger than nondominated set)
 
         Returns:
-            pop_new: list of individuals, selected by NSGA-II survival strategy
+            pop_new: list of non-dominated individuals only
         """
         # Filter valid individuals
         pop = [ind for ind in pop_input if ind.score is not None]
-        if size > len(pop):
-            size = len(pop)
+        if not pop:
+            return []
 
         # Deduplicate by score
         unique_pop, seen_scores = [], set()
@@ -276,27 +276,17 @@ class MOMCTS_AHD:
         nds = NonDominatedSorting()
         fronts = nds.do(scores)
 
-        survivors = []
-        for front_indices in fronts:
-            front_individuals = [unique_pop[i] for i in front_indices]
+        # Keep only the first front (nondominated solutions)
+        nondominated_indices = fronts[0]
+        nondominated = [unique_pop[i] for i in nondominated_indices]
 
-            if len(survivors) + len(front_individuals) <= size:
-                survivors.extend(front_individuals)
-            else:
-                remaining_slots = size - len(survivors)
-                if remaining_slots > 0:
-                    # Compute crowding distance for this front
-                    front_scores = scores[front_indices]
-                    crowding = get_crowding_function("cd").do(front_scores, np.arange(len(front_individuals)))
+        # Optionally truncate if 'size' is smaller than number of nondominated
+        if size is not None and len(nondominated) > size:
+            nondominated = nondominated[:size]
 
-                    # Sort descending by crowding distance
-                    sorted_idx = np.argsort(-crowding)
-                    chosen = [front_individuals[i] for i in sorted_idx[:remaining_slots]]
-                    survivors.extend(chosen)
-                break
+        print(f"Output for population management s1: {nondominated}")
+        return nondominated
 
-        pop_new = survivors[:size]
-        return pop_new
 
     def expand(self, mcts: MCTS, node_set: list[MCTSNode], cur_node: MCTSNode, option: str):
         print(f"Current node depth: {cur_node.depth}")  
@@ -308,7 +298,7 @@ class MOMCTS_AHD:
             while now.algorithm != "Root":
                 path_set.append(now.individual)
                 now = copy.deepcopy(now.parent)
-            path_set = self.population_management_s1(path_set, size = 5)
+            # path_set = self.population_management_s1(path_set)
             if len(path_set) == 1:
                 return node_set
 
@@ -422,7 +412,7 @@ class MOMCTS_AHD:
         elif option == 'elitist':
             i = 0
             while i < 3:  # Retries giới hạn để flash
-                elites = self.population_management_s1(self._population.population, size=5) # survival is enough 
+                elites = self.population_management_s1(self._population.population) # survival is enough 
                 if len(elites) < 2:
                     print("Not enough elites for elitist action.")
                     return node_set
@@ -612,7 +602,7 @@ class MOMCTS_AHD:
 
         # evolutionary search
         n_op = ['e1', 'e2', 'm1', 'm2', 's1', 'elitist']  # Thêm 'elitist'
-        op_weights = [0, 1, 1, 1, 1, 1]  # Weight cao hơn cho elitist để ưu tiên develop elites
+        op_weights = [0, 2, 1, 1, 1, 1]  # Weight cao hơn cho elitist để ưu tiên develop elites
         while self._continue_loop():  # if current evaluation < max evaluation, still evaluate function
             node_set = []
             print(

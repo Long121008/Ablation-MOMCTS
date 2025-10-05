@@ -39,8 +39,7 @@ class MOMCTSSampler:
     @classmethod
     def trim_thought_from_response(cls, response: str) -> str | None:
         try:
-            pattern = r'\{(.*?)\}'  # Compared with r'\{(.*)\}'
-            bracketed_texts = re.findall(pattern, response)
-            return bracketed_texts[0]
-        except:
+            match = re.search(r'\{([\s\S]*?)\}', response)
+            return match.group(1).strip() if match else None
+        except Exception:
             return None

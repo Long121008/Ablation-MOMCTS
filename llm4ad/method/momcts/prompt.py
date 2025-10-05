@@ -270,21 +270,23 @@ Check syntax, code carefully before returning the final function. Do not give ad
         indivs_prompt = ""
         for i, indi in enumerate(sorted_indivs):
             indi.docstring = ''
-            indivs_prompt += f"No. {i+1} (best to worst): Description: {indi.algorithm}\nCode: {str(indi)}\n"
+            indivs_prompt += f"No. {i+1}: Description: {indi.algorithm}\nCode: {str(indi)}\n"
 
         prompt_content = f'''{cls.get_system_prompt()}\n{task_prompt}
 ### List heuristics
-Below is a list of design heuristics ranked from best to worst.
+Below is a list of design heuristics grouped by dominance relationships (Pareto principle).
 {indivs_prompt}
 ### Guide
-- Keep in mind, list of design heuristics ranked from best to worst. Meaning the first function in the list is the best and the last function in the list is the worst.
+- Keep in mind, heuristics are **grouped by dominance** rather than ranked linearly.
+  - The **Nondominated** group represents the best trade-offs among objectives.
+  - The **Dominated** group contains heuristics that are outperformed on at least one objective.
 - The response in Markdown style and nothing else has the following structure:
 '**Analysis:**\n**Experience:**'
 In there:
-+ Meticulously analyze comments, docstrings and source code of several pairs (Better code - Worse code) in List heuristics to fill values for **Analysis:**.
-Example: “Comparing (best) vs (worst), we see ...; (second best) vs (second worst) ...; Comparing (1st) vs (2nd), we see ...; (3rd) vs (4th) ...; Comparing (worst) vs (second worst), we see ...; Overall:...”
-+ Self-reflect to extract useful experience for design better heuristics and fill to **Experience:** (< 60 words).
-I’m going to tip $999K for a better heuristics! Let’s think step by step.'''
++ Meticulously analyze **comments, docstrings, and source code** of several pairs or groups of heuristics across and within these groups to fill **Analysis:**.
+  Example: “Comparing nondominated vs dominated heuristics, we see ...; Within nondominated ones, comparing ...; Overall: ...”
++ Self-reflect to extract useful experience for designing better heuristics and fill **Experience:** (< 60 words).
+I’m going to tip $999K for a better nondominated heuristic design! Let’s think step by step.'''
         return prompt_content
 
     @classmethod
