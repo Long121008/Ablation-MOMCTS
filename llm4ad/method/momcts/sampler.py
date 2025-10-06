@@ -29,11 +29,24 @@ class MOMCTSSampler:
         return describe, function
 
     def get_prompt_refine(self, task_prompt: str, idea: str, code: str):
-        prompt_content = task_prompt + "\n" + "Following is the Design Idea of a heuristic algorithm for the problem and the code for implementing the heuristic algorithm.\n"
-        prompt_content += "\nDesign Idea:\n" + idea
+        prompt_content = task_prompt + "\n"
+        prompt_content += "Following is the Design Idea of a heuristic algorithm for the problem and the code for implementing the heuristic algorithm.\n"
+
+        if idea:  # if not None or empty
+            prompt_content += "\nDesign Idea:\n" + idea
+        else:
+            prompt_content += "\nDesign Idea:\n(No explicit design idea was provided; you should infer it from the code.)"
+
         prompt_content += "\n\nCode:\n" + code
-        prompt_content += "\n\nThe content of the Design Idea idea cannot fully represent what the algorithm has done informative. So, now you should re-describe the algorithm using less than 3 sentences.\n"
-        prompt_content += "Hint: You should reference the given Design Idea and highlight the most critical design ideas of the code. You can analyse the code to describe which variables are given higher priorities and which variables are given lower priorities, the parameters and the structure of the code."
+        prompt_content += (
+            "\n\nThe content of the Design Idea cannot fully represent what the algorithm has done."
+            " So, now you should re-describe the algorithm using less than 3 sentences.\n"
+        )
+        prompt_content += (
+            "Hint: You should reference the given Design Idea (if any) and highlight the most critical design ideas in the code."
+            " You can analyze the code to describe which variables are given higher or lower priorities, and the overall structure."
+        )
+
         return prompt_content
 
     @classmethod

@@ -33,8 +33,8 @@ class MOMCTS_AHD:
                  selection_num: int = 2,
                  num_samplers: int = 4,  # the number of threads to sample in parallel
                  num_evaluators: int = 4,
-                 alpha: float = 0.5,
-                 lambda_0: float = 0.1,
+                 alpha: float = 0.4,
+                 lambda_0: float = 0.01,
                  review = False,
                  *,
                  resume_mode: bool = False,

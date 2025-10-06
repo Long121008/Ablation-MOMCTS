@@ -21,11 +21,11 @@ algorithm_map = {
 }
 
 ALGORITHM_NAME = 'momcts'  # Could also be 'MEoH' or 'NSGA2'
-PROBLEM_NAME = "bi_kp" # Could also be "tsp_semo, bi_kp"
+PROBLEM_NAME = "tsp_semo" # Could also be "tsp_semo, bi_kp"
 
 MethodClass, ProfilerClass = algorithm_map[ALGORITHM_NAME]
 log_dir = f'logs/{ALGORITHM_NAME}/{PROBLEM_NAME}'
-exact_log_dir_name = "v6" # must be unique here
+exact_log_dir_name = "codestral_300_v6" # must be unique here
 
 if __name__ == '__main__':
     llm = MistralApi(
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         model='codestral-latest',
         timeout=60
     )
-    task = BIKPEvaluation()
+    task = BITSPEvaluation() # BITSPEvaluation
     method = MethodClass(
         llm=llm,
         llm_cluster=llm,

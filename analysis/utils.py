@@ -4,6 +4,7 @@ import os
 import re
 import glob
 from pathlib import Path
+from typing import List, Dict, Any
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
 def read_json(json_path: str):
@@ -11,18 +12,80 @@ def read_json(json_path: str):
         data = json.load(f)
     return data
 
-def read_score_from_path(json_data: str) -> list[list[float, float]]:
+def _filter_items_by_seen_orders(items: List[Dict[str, Any]], seen_orders: set, order_key: str = "sample_order"):
+    """
+    Return (filtered_items, removed_count). Items whose sample_order is already in seen_orders are skipped.
+    If an item has no sample_order, it is kept.
+    """
+    out = []
+    removed = 0
+    for item in items:
+        so = item.get(order_key)
+        if so is None:
+            out.append(item)
+            continue
+        try:
+            key = int(so)
+        except Exception:
+            key = so
+        if key in seen_orders:
+            removed += 1
+            continue
+        seen_orders.add(key)
+        out.append(item)
+    return out, removed
+
+def _dedupe_items_in_list(items: List[Dict[str, Any]], order_key: str = "sample_order"):
+    """
+    Dedupe within a single list: keep the first occurrence and remove later duplicates.
+    Returns (filtered_items, removed_count).
+    """
+    seen = set()
+    out = []
+    removed = 0
+    for item in items:
+        so = item.get(order_key)
+        if so is None:
+            out.append(item)
+            continue
+        try:
+            key = int(so)
+        except Exception:
+            key = so
+        if key in seen:
+            removed += 1
+            continue
+        seen.add(key)
+        out.append(item)
+    return out, removed
+
+def read_score_from_path(json_data: str) -> List[List[float]]:
+    """
+    Read a single JSON file (list of items) and return list of [score0, score1].
+    If the file contains duplicate sample_order values, later duplicates are removed (keeps first).
+    """
     skip_item_num = 0
     with open(json_data, "r") as f:
         data = json.load(f)
-    scores = []
-    for item in data:
+
+    if not isinstance(data, list):
+        raise ValueError(f"Expected a JSON array in {json_data}")
+
+    filtered, removed = _dedupe_items_in_list(data)
+    
+    scores: List[List[float]] = []
+    for item in filtered:
         if 'score' in item and isinstance(item['score'], list) and len(item['score']) == 2:
-            scores.append(item['score'])
+            try:
+                s0 = float(item['score'][0])
+                s1 = float(item['score'][1])
+                scores.append([s0, s1])
+            except Exception:
+                skip_item_num += 1
+                print("Warning: Skipping item due to non-numeric 'score'.")
         else:
             skip_item_num += 1
-            print(f"Warning: Skipping item due to invalid 'score'.")
-    print(f"Skip item numbers: {skip_item_num}")
+            print("Warning: Skipping item due to invalid or missing 'score'.")
     return scores
 
 def find_pareto_front_from_scores(scores: list[list[float, float]]):
