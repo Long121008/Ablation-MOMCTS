@@ -124,56 +124,6 @@ class MOMCTS_AHD:
         self.bad_reflections = []   # Store phase 2 outputs where no improvement
         self.long_term_hints = ""   # Aggregate good reflections for long-term influence on code generation
 
-    def _perform_short_term_reflection(self, node: MCTSNode):
-        if node is None or node.parent is None or node.parent == self.mcts.root:
-            return
-
-        reflection_set = []
-        parent_individual = node.parent.individual
-        if parent_individual is not None:
-            reflection_set.append(parent_individual)
-
-        for sibling_node in node.parent.children:
-            if sibling_node.individual is not None:
-                reflection_set.append(sibling_node.individual)
-        
-        unique_reflection_set = []
-        unique_algorithms = []
-        for individual in reflection_set:
-            if str(individual) not in unique_algorithms:
-                unique_reflection_set.append(individual)
-                unique_algorithms.append(str(individual))
-        
-        if len(unique_reflection_set) < 2:
-            return
-
-        try:
-            prompt = MOMCTSPrompt.get_short_term_reflection_prompt(
-                self._task_description_str, unique_reflection_set, self._function_to_evolve
-            )
-            print("Performing short-term reflection...")
-            self._sample_evaluate_register(prompt, op='short_term')
-        except Exception as e:
-            print(f"Error during short-term reflection: {e}")
-            if self._debug_mode:
-                traceback.print_exc()
-
-    def _perform_long_term_reflection(self):
-        best_individuals = self.population_management_s1(self._population.population, size=self._pop_size)
-        
-        if len(best_individuals) < 2:
-            return
-
-        try:
-            prompt = MOMCTSPrompt.get_long_term_reflection_prompt(
-                self._task_description_str, best_individuals, self._function_to_evolve
-            )
-            print("Performing long-term reflection...")
-            self._sample_evaluate_register(prompt, op='long_term')
-        except Exception as e:
-            print(f"Error during long-term reflection: {e}")
-            if self._debug_mode:
-                traceback.print_exc()
 
     def _sample_evaluate_register(self, prompt, op: str, func_only=False, max_retries=3):
         for attempt in range(max_retries):
@@ -298,7 +248,7 @@ class MOMCTS_AHD:
             while now.algorithm != "Root":
                 path_set.append(now.individual)
                 now = copy.deepcopy(now.parent)
-            # path_set = self.population_management_s1(path_set)
+            path_set = self.population_management_s1(path_set)
             if len(path_set) == 1:
                 return node_set
 

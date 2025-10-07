@@ -1,8 +1,9 @@
 from llm4ad.task.optimization.bi_tsp_semo import BITSPEvaluation
 from llm4ad.task.optimization.bi_kp import BIKPEvaluation
-from llm4ad.tools.llm.llm_api_gemini import GeminiApi
+from llm4ad.task.optimization.bi_cvrp import BICVRPEvaluation
+
 from llm4ad.tools.llm.llm_api_codestral import MistralApi
-from llm4ad.tools.profiler import ProfilerBase
+
 from llm4ad.method.momcts import MOMCTS_AHD, MOMCTSProfiler
 from llm4ad.method.meoh import MEoH, MEoHProfiler
 from llm4ad.method.nsga2 import NSGA2, NSGA2Profiler
@@ -20,20 +21,20 @@ algorithm_map = {
     'mpage': (MPaGE, EoHProfiler)
 }
 
-ALGORITHM_NAME = 'momcts'  # Could also be 'MEoH' or 'NSGA2'
-PROBLEM_NAME = "tsp_semo" # Could also be "tsp_semo, bi_kp"
+ALGORITHM_NAME = 'nsga2'  # Could also be 'MEoH' or 'NSGA2'
+PROBLEM_NAME = "bi_cvrp" # Could also be "tsp_semo, bi_kp, bi_cvrp"
 
 MethodClass, ProfilerClass = algorithm_map[ALGORITHM_NAME]
 log_dir = f'logs/{ALGORITHM_NAME}/{PROBLEM_NAME}'
-exact_log_dir_name = "codestral_300_v6" # must be unique here
+exact_log_dir_name = "v1" # must be unique here
 
 if __name__ == '__main__':
     llm = MistralApi(
-        keys="M8cikiCWLLo0nEARlNY88jaBauCyaXWB",
+        keys="b7uSUPCIevBX2vQ9pOr1m8qHsYodhZGd",
         model='codestral-latest',
         timeout=60
     )
-    task = BITSPEvaluation() # BITSPEvaluation
+    task = BICVRPEvaluation() # BITSPEvaluation
     method = MethodClass(
         llm=llm,
         llm_cluster=llm,
