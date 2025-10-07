@@ -35,7 +35,7 @@ class MOMCTS_AHD:
                  num_evaluators: int = 4,
                  alpha: float = 0.4,
                  lambda_0: float = 0.01,
-                 review = False,
+                 review = True,
                  *,
                  resume_mode: bool = False,
                  debug_mode: bool = False,
@@ -194,7 +194,7 @@ class MOMCTS_AHD:
         return False
 
     # add tree path for reasoning s1
-    def population_management_s1(self, pop_input, size=None):
+    def population_management_s1(self, pop_input: list[Function], size=None):
         """
         Args:
             pop_input: list of individuals (each with .score attribute)
@@ -248,14 +248,18 @@ class MOMCTS_AHD:
             while now.algorithm != "Root":
                 path_set.append(now.individual)
                 now = copy.deepcopy(now.parent)
-            path_set = self.population_management_s1(path_set)
+            # path_set = self.population_management_s1(path_set)
             if len(path_set) == 1:
                 return node_set
 
             i = 0
             while i < 3:
-                prompt = MOMCTSPrompt.get_prompt_s1(
-                    self._task_description_str, path_set, self._function_to_evolve)
+                if self.review and self.long_term_hints is not None:
+                    prompt = MOMCTSPrompt.get_prompt_s1(
+                    self._task_description_str, path_set, self._function_to_evolve, self.long_term_hints)
+                else:
+                    prompt = MOMCTSPrompt.get_prompt_s1(
+                        self._task_description_str, path_set, self._function_to_evolve)
                 func = self._sample_evaluate_register(prompt, option, func_only=True)
                 if func is False:
                     is_valid_func = False
@@ -275,15 +279,8 @@ class MOMCTS_AHD:
                       # so mcts.root.children becauses we only use e1 in initialization
                       children in mcts.root.children]
             
-            if self.review and len(indivs) >= 2:
-                print(f"Perform suggestion in e1.")
-                prompt_suggestion = MOMCTSPrompt.get_prompt_suggestions_only(self._task_description_str, indivs, self._function_to_evolve)
-                suggestion_result = self._sampler.get_thought(prompt_suggestion)
-                prompt = MOMCTSPrompt.get_prompt_e1(
-                                        self._task_description_str, indivs, self._function_to_evolve, suggestion_result)
-            else:
-                prompt = MOMCTSPrompt.get_prompt_e1(
-                    self._task_description_str, indivs, self._function_to_evolve)
+            prompt = MOMCTSPrompt.get_prompt_e1(
+                self._task_description_str, indivs, self._function_to_evolve)
                 
             func = self._sample_evaluate_register(prompt, option, func_only=True)
             if func is False:
@@ -302,11 +299,9 @@ class MOMCTS_AHD:
                 
                 indivs = [now_indiv, cur_node.individual] 
                 
-                if self.review:
-                    prompt_suggestion = MOMCTSPrompt.get_prompt_suggestions_only(self._task_description_str, indivs, self._function_to_evolve)
-                    suggestion_result = self._sampler.get_thought(prompt_suggestion)
+                if self.review and self.long_term_hints is not None:
                     prompt = MOMCTSPrompt.get_prompt_e2(
-                                            self._task_description_str, indivs, self._function_to_evolve, suggestion_result)
+                                            self._task_description_str, indivs, self._function_to_evolve, self.long_term_hints)
                 else:
                     prompt = MOMCTSPrompt.get_prompt_e2(
                     self._task_description_str, indivs, self._function_to_evolve)
@@ -404,15 +399,13 @@ class MOMCTS_AHD:
                     i += 1
                     continue
                 else:
-                    # Check if discovered (better than best in elites)
-                    best_score = elites[0].score
-                    if np.all(func.score < best_score):  # Adjust comparator if minimizing
+                    is_dominated = any(dominates(elite.score, func.score) for elite in elites)            
+                    if not is_dominated: 
                         self.good_reflections.append(long_term_guide)
                     else:
                         self.bad_reflections.append(long_term_guide)
 
-                    # Update long-term hints (aggregate good reflections for future use)
-                    self.long_term_hints = "\n".join(self.good_reflections[-10:])  # Accumulate recent good ones
+                    self.long_term_hints = long_term_guide  # Accumulate recent good ones
                     break
 
             if not is_valid_func:
