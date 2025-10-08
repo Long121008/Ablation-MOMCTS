@@ -14,7 +14,7 @@ __all__ = ['BICVRPEvaluation']
 def compute_route_length(route: np.ndarray, distance_matrix: np.ndarray) -> float:
     if len(route) <= 1:
         return 0.0
-    return sum(distance_matrix[route[i], route[i+1]] for i in range(len(route)-1))
+    return np.sum(distance_matrix[route[:-1], route[1:]])
 
 def evaluate_solution(routes: list[np.ndarray], distance_matrix: np.ndarray):
     total_distance = 0.0
@@ -85,7 +85,7 @@ def evaluate(instance_data, n_instance, ref_point, capacity, evaluate_func: call
         start = time.time()
         init_solutions = [random_solution(len(demand)-1, capacity, demand) for _ in range(10)]
         archive = [(s, evaluate_solution(s, distance_matrix)) for s in init_solutions]
-        for _ in range(6000):
+        for _ in range(2000):
             s_prime = evaluate_func(archive, coords, demand, distance_matrix, capacity)
             if not is_feasible_solution(s_prime, demand, capacity):
                 continue

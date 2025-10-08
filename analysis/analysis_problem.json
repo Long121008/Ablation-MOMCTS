@@ -43,5 +43,24 @@
             "logs/meoh/bi_kp/v3_hoang/samples/samples_0~300.json",
             "logs/meoh/bi_kp/v2_hoang/samples/samples_0~300.json"
         ]
+    },
+    "bi_cvrp": {
+        "MoMCTS": [
+                "logs/momcts/bi_cvrp/v1/samples/samples_1~300.json",
+                "logs/momcts/bi_cvrp/v2/samples/samples_1~300.json"
+                ],
+        "MPaGe": [
+            "logs/mpage/bi_cvrp/v1/samples/samples_0~300.json",
+            "logs/mpage/bi_cvrp/v2/samples/samples_0~300.json"
+        ],
+        "NSGA2": [
+            "logs/nsga2/bi_cvrp/v1/samples/samples_0~300.json",
+            "logs/nsga2/bi_cvrp/v2/samples/samples_0~300.json",
+            "logs/nsga2/bi_cvrp/v3/samples/samples_0~300.json"
+        ],
+        "MEoH": [
+            "logs/meoh/bi_cvrp/v1/samples/samples_0~300.json",
+            "logs/meoh/bi_cvrp/v2/samples/samples_0~300.json"
+        ]
     }
 }

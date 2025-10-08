@@ -27,9 +27,9 @@ task_map = {
 }
 
 # Change variable here
-ALGORITHM_NAME = 'nsga2'  # Could also be 'MEoH' or 'NSGA2'
+ALGORITHM_NAME = 'mpage'  # Could also be 'MEoH' or 'NSGA2'
 PROBLEM_NAME = "bi_cvrp" # Could also be "tsp_semo, bi_kp, bi_cvrp"
-exact_log_dir_name = "v1" # must be unique here
+exact_log_dir_name = "v2" # must be unique here
 api_key = os.getenv('API_KEY3') # change APIKEY1, APIKEY2, APIKEY3
 
 if __name__ == '__main__':

@@ -70,7 +70,6 @@ Check syntax, code carefully before returning the final function. Do not give ad
     def get_prompt_e2(cls, task_prompt: str, indivs: List[Function], template_function: Function, suggestions = None):
         for indi in indivs:
             assert hasattr(indi, 'algorithm')
-
         # template
         temp_func = copy.deepcopy(template_function)
         # create prompt content for all individuals

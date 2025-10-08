@@ -120,9 +120,9 @@ class MOEADProfiler(ProfilerBase):
         }
 
         if record_type == 'history':
-            lower_bound = (sample_order // record_sep) * record_sep
+            lower_bound = (sample_order - 1 // record_sep) * record_sep
             upper_bound = lower_bound + record_sep
-            filename = f'samples_{lower_bound}~{upper_bound}.json'
+            filename = f'samples_{lower_bound + 1}~{upper_bound}.json'
         else:
             filename = 'samples_best.json'
 
