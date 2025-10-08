@@ -51,7 +51,8 @@
                 ],
         "MPaGe": [
             "logs/mpage/bi_cvrp/v1/samples/samples_0~300.json",
-            "logs/mpage/bi_cvrp/v2/samples/samples_0~300.json"
+            "logs/mpage/bi_cvrp/v2/samples/samples_0~300.json",
+            "logs/mpage/bi_cvrp/v3/samples/samples_0~300.json"
         ],
         "NSGA2": [
             "logs/nsga2/bi_cvrp/v1/samples/samples_0~300.json",
