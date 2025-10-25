@@ -56,7 +56,7 @@ class MOEADProfiler(ProfilerBase):
                     if np.isinf(np.array(f.score)).any():
                         f_score = None
                     else:
-                        f_score = f_score.tolist()
+                        f_score = f_score
                 f_json = {
                     'algorithm': f.algorithm,
                     'function': str(f),
@@ -75,7 +75,7 @@ class MOEADProfiler(ProfilerBase):
                     if np.isinf(np.array(f.score)).any():
                         f_score = None
                     else:
-                        f_score = f_score.tolist()
+                        f_score = f_score
                 f_json = {
                     'algorithm': f.algorithm,
                     'function': str(f),
@@ -90,7 +90,7 @@ class MOEADProfiler(ProfilerBase):
             if self._pop_lock.locked():
                 self._pop_lock.release()
 
-    def _write_json(self, function: Function, program='', *, record_type='history', record_sep=200):
+    def _write_json(self, prompt, function: Function, program='', *, record_type='history', record_sep=300):
         """
             Write function data to a JSON file.
 
@@ -110,8 +110,9 @@ class MOEADProfiler(ProfilerBase):
             if np.isinf(np.array(function.score)).any():
                 func_score = None
             else:
-                func_score = func_score.tolist()
+                func_score = func_score
         content = {
+            'prompt': prompt,
             'sample_order': sample_order,
             'algorithm': function.algorithm,  # Added when recording
             'function': str(function),
@@ -120,9 +121,9 @@ class MOEADProfiler(ProfilerBase):
         }
 
         if record_type == 'history':
-            lower_bound = (sample_order - 1 // record_sep) * record_sep
+            lower_bound = (sample_order // record_sep) * record_sep
             upper_bound = lower_bound + record_sep
-            filename = f'samples_{lower_bound + 1}~{upper_bound}.json'
+            filename = f'samples_{lower_bound}~{upper_bound}.json'
         else:
             filename = 'samples_best.json'
 

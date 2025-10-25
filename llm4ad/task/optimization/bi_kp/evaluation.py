@@ -61,7 +61,7 @@ def evaluate(instance_data, n_instance, problem_size, ref_point, capacity, eva: 
         start = time.time()
         s = [random_solution(weight_lst, capacity, problem_size) for _ in range(20)]
         Archive = [(s_, knapsack_value(s_, weight_lst, value1_lst, value2_lst, capacity)) for s_ in s if knapsack_value(s_, weight_lst, value1_lst, value2_lst, capacity)[0] > -1e5]
-        for _ in range(8000):
+        for _ in range(4000):
             s_prime = np.array(eva(Archive, weight_lst, value1_lst, value2_lst, capacity))
             f_s_prime = knapsack_value(s_prime, weight_lst, value1_lst, value2_lst, capacity)
 

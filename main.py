@@ -8,6 +8,7 @@ from llm4ad.method.momcts import MOMCTS_AHD, MOMCTSProfiler
 from llm4ad.method.meoh import MEoH, MEoHProfiler
 from llm4ad.method.nsga2 import NSGA2, NSGA2Profiler
 from llm4ad.method.mpage import EoHProfiler, MPaGE
+from llm4ad.method.moead import MOEAD, MOEADProfiler
 import os
 from dotenv import load_dotenv
 
@@ -17,7 +18,8 @@ algorithm_map = {
     'momcts': (MOMCTS_AHD, MOMCTSProfiler),
     'meoh': (MEoH, MEoHProfiler),
     'nsga2': (NSGA2, NSGA2Profiler),
-    'mpage': (MPaGE, EoHProfiler)
+    'mpage': (MPaGE, EoHProfiler),
+    'moead': (MOEAD, MOEADProfiler)
 }
 
 task_map = {
@@ -27,7 +29,7 @@ task_map = {
 }
 
 # Change variable here
-ALGORITHM_NAME = 'momcts'  # Could also be 'MEoH' or 'NSGA2'
+ALGORITHM_NAME = 'moead'  # Could also be 'MEoH' or 'NSGA2'
 PROBLEM_NAME = "bi_cvrp" # Could also be "tsp_semo, bi_kp, bi_cvrp"
 exact_log_dir_name = "v3" # must be unique here
 api_key = os.getenv('API_KEY1') # change APIKEY1, APIKEY2, APIKEY3
@@ -55,6 +57,6 @@ if __name__ == '__main__':
         pop_size=10, # 20
         num_samplers=4,
         num_evaluators=4,
-        selection_num=2 # change to 5 for meoh  
+        selection_num=2     
         )
     method.run()

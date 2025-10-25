@@ -108,8 +108,8 @@ def compare_pareto_from_algorithms(file_dict: dict[str, list[str]], show_global=
         )
 
     # === Step 3: Plot settings ===
-    plt.xlim(-1.0, -0.60)
-    plt.ylim(-0.1, 0.8)
+    plt.xlim(-1.1, -0.4)
+    plt.ylim(-0.1, 5)
     plt.xlabel("Hypervolume (negative, minimize)")
     plt.ylabel("Runtime (positive, minimize)")
     plt.title("Pareto Front Comparison Across Algorithms")

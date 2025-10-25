@@ -128,35 +128,42 @@ class MOEAD:
                 max_workers=num_evaluators
             )
 
-    def _sample_evaluate_register(self, prompt):
+    def _sample_evaluate_register(self, prompt, max_retries = 3):
         """Sample a function using the given prompt -> evaluate it by submitting to the process/thread pool ->
         add the function to the population and register it to the profiler.
         """
-        sample_start = time.time()
-        thought, func = self._sampler.get_thought_and_function(prompt)
-        sample_time = time.time() - sample_start
-        if thought is None or func is None:
-            return
+        for attempt in range(max_retries):
+            sample_start = time.time()
+            thought, func = self._sampler.get_thought_and_function(prompt)
+            sample_time = time.time() - sample_start
+            if thought is None or func is None:
+                return
 
-        # convert to Program instance
-        program = TextFunctionProgramConverter.function_to_program(func, self._template_program)
-        if program is None:
-            return
+            program = TextFunctionProgramConverter.function_to_program(func, self._template_program)
+            if program is None:
+                return
 
-        # evaluate
-        score, eval_time = self._evaluation_executor.submit(
-            self._evaluator.evaluate_program_record_time,
-            program
-        ).result()
+            score, eval_time = self._evaluation_executor.submit(
+                self._evaluator.evaluate_program_record_time,
+                program
+            ).result()
+            
+            if score is not None:
+                break
+            else:
+                print(f"⚠️ Score is None (attempt {attempt+1}/{max_retries}), retrying...")
 
-        # score
+        if score is None:
+            print("❌ Failed to get a valid score after retries.")
+            return False
+
         func.score = score
         func.evaluate_time = eval_time
         func.algorithm = thought
         func.sample_time = sample_time
         try:
             if self._profiler is not None:
-                self._profiler.register_function(func, program=str(program))
+                self._profiler.register_function(prompt, func, program=str(program))
                 if isinstance(self._profiler, MOEADProfiler):
                     self._profiler.register_population(self._population)
                 self._tot_sample_nums += 1

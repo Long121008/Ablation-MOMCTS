@@ -66,7 +66,7 @@ class Population:
 
                 pop_elitist = pop + self._elitist
                 objs = [ind.score for ind in pop_elitist]
-                objs_array = -np.array(objs)
+                objs_array = np.array(objs)
                 nondom_idx = NonDominatedSorting().do(objs_array, only_non_dominated_front=True)
                 self._elitist = []
                 for idx in nondom_idx.tolist():
@@ -75,11 +75,11 @@ class Population:
                 crt_pop_size = len(pop)
                 selected_idx_list = []
                 for i in range(self._pop_size//5):
-                    best_sub_score = float('-inf')
+                    best_sub_score = float('inf')
                     best_sub_idx = None
                     for j in range(crt_pop_size):
                         sub_score = -np.max(-self._weight_vectors[:, i] * np.array(pop[j].score)) # TCH
-                        if best_sub_score < sub_score and np.isfinite(sub_score):
+                        if best_sub_score > sub_score and np.isfinite(sub_score):
                             best_sub_score = sub_score
                             best_sub_idx = j
                     selected_idx_list.append(best_sub_idx)
@@ -109,10 +109,10 @@ class Population:
         for i in range(len(self._next_gen_pop)):
             f = self._next_gen_pop[i]
             if str(f) == str(func):
-                if func.score[0] > f.score[0]:
+                if func.score[0] < f.score[0]:
                     self._next_gen_pop[i] = func
                     return True
-                if func.score[0] == f.score[0] and func.score[1] > f.score[1]:
+                if func.score[0] == f.score[0] and func.score[1] < f.score[1]:
                     self._next_gen_pop[i] = func
                     return True
         return False

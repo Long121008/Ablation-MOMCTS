@@ -20,8 +20,18 @@
             "logs/meoh/tsp_semo/codestral_v1_latest_sort/samples/samples_0~300.json",
             "logs/meoh/tsp_semo/codestral_v2_latest_sort/samples/samples_0~300.json",
             "logs/meoh/tsp_semo/codestral_v3_latest_sort/samples/samples_0~300.json"
+        ],
+        "MOMEA": [
+            "logs/moead/tsp_semo/v1/samples/samples_0~300.json",
+            "logs/moead/tsp_semo/v2/samples/samples_0~300.json",
+            "logs/moead/tsp_semo/v3/samples/samples_0~300.json"
+
+        ], 
+        "MOMCTS_Weight_Sum": [
+            "logs/momcts_weight_sum/tsp_semo/v1/samples/samples_1~300.json",
+            "logs/momcts_weight_sum/tsp_semo/v2/samples/samples_1~300.json",
+            "logs/momcts_weight_sum/tsp_semo/v3/samples/samples_1~300.json"
         ]
-       
     },
     "bi_kp": {
         "MoMCTS": [
@@ -42,6 +52,10 @@
             "logs/meoh/bi_kp/v1/samples/samples_0~300.json",
             "logs/meoh/bi_kp/v3_hoang/samples/samples_0~300.json",
             "logs/meoh/bi_kp/v2_hoang/samples/samples_0~300.json"
+        ],
+        "MOMEA": [
+            "logs/moead/bi_kp/v1/samples/samples_0~300.json",
+            "logs/moead/bi_kp/v2/samples/samples_0~300.json"
         ]
     },
     "bi_cvrp": {
@@ -64,6 +78,15 @@
             "logs/meoh/bi_cvrp/v1/samples/samples_0~300.json",
             "logs/meoh/bi_cvrp/v2/samples/samples_0~300.json",
             "logs/meoh/bi_cvrp/v3/samples/samples_1~300.json"
+        ],
+        "MOMEA": [
+            "logs/moead/bi_cvrp/v1/samples/samples_0~300.json",
+            "logs/moead/bi_cvrp/v3/samples/samples_0~300.json",
+            "logs/moead/bi_cvrp/v2/samples/samples_0~300.json"
+        ],
+         "MOMCTS_Weight_Sum": [
+            "logs/momcts_weight_sum/bi_cvrp/v1/samples/samples_1~300.json",
+            "logs/momcts_weight_sum/bi_cvrp/v2/samples/samples_1~300.json"
         ]
     }
 }

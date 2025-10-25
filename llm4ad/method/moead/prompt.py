@@ -23,7 +23,6 @@ class MOEADPrompt:
     def get_prompt_i1(cls, task_prompt: str, template_function: Function):
         # template
         temp_func = copy.deepcopy(template_function)
-        temp_func.body = ''
         # create prompt content
         prompt_content = f'''{task_prompt}
 1. First, describe your new algorithm and main steps in one sentence. The description must be inside within boxed {{}}. 
@@ -38,7 +37,6 @@ Do not give additional explanations.'''
             assert hasattr(indi, 'algorithm')
         # template
         temp_func = copy.deepcopy(template_function)
-        temp_func.body = ''
         # create prompt content for all individuals
         indivs_prompt = ''
         for i, indi in enumerate(indivs):
@@ -85,7 +83,6 @@ Do not give additional explanations.'''
         assert hasattr(indi, 'algorithm')
         # template
         temp_func = copy.deepcopy(template_function)
-        temp_func.body = ''
 
         # create prmpt content
         prompt_content = f'''{task_prompt}
@@ -105,7 +102,6 @@ Do not give additional explanations.'''
         assert hasattr(indi, 'algorithm')
         # template
         temp_func = copy.deepcopy(template_function)
-        temp_func.body = ''
         # create prmpt content
         prompt_content = f'''{task_prompt}
 I have one algorithm with its code as follows. Algorithm description:
