@@ -28,7 +28,7 @@
 
         ], 
         "MOMCTS_Weight_Sum": [
-            "logs/momcts_weight_sum/tsp_semo/v1/samples/samples_1~300.json",
+            "logs/momcts_weight_sum/tsp_semo/v1_raw_obj/samples/samples_1~300.json",
             "logs/momcts_weight_sum/tsp_semo/v2/samples/samples_1~300.json",
             "logs/momcts_weight_sum/tsp_semo/v3/samples/samples_1~300.json"
         ]
