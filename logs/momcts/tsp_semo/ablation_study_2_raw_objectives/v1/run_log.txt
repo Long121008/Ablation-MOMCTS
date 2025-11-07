@@ -1,0 +1,227 @@
+[2025-11-07 15:02:46] profile.py(227) : ====================================================================
+[2025-11-07 15:02:46] profile.py(228) : LLM Parameters
+[2025-11-07 15:02:46] profile.py(229) : --------------------------------------------------------------------
+[2025-11-07 15:02:46] profile.py(230) :   - LLM: MistralApi
+[2025-11-07 15:02:46] profile.py(233) :   - do_auto_trim: True
+[2025-11-07 15:02:46] profile.py(233) :   - debug_mode: False
+[2025-11-07 15:02:46] profile.py(233) :   - _client: <mistralai.sdk.Mistral object at 0x131dcfd70>
+[2025-11-07 15:02:46] profile.py(233) :   - model_name: codestral-latest
+[2025-11-07 15:02:46] profile.py(233) :   - _timeout: 60
+[2025-11-07 15:02:46] profile.py(233) :   - _kwargs: {}
+[2025-11-07 15:02:46] profile.py(233) :   - _api_key: M8cikiCWLLo0nEARlNY88jaBauCyaXWB
+[2025-11-07 15:02:46] profile.py(233) :   - _max_retries: 3
+[2025-11-07 15:02:46] profile.py(234) : ====================================================================
+[2025-11-07 15:02:46] profile.py(235) : Problem Parameters
+[2025-11-07 15:02:46] profile.py(236) : --------------------------------------------------------------------
+[2025-11-07 15:02:46] profile.py(237) :   - Problem: BITSPEvaluation
+[2025-11-07 15:02:46] profile.py(240) :   - task_description: You are solving a Bi-objective Travelling Salesman Problem (bi-TSP), where each node has two different 2D coordinates: (x1, y1) and (x2, y2), representing its position in two objective spaces. The goal is to find a tour visiting each node exactly once and returning to the starting node, while minimizing two objectives simultaneously: the total tour length in each coordinate space. Given an archive of solutions, where each solution is a numpy array representing a TSP tour, and its corresponding objective is a tuple of two values (cost in each space), design a heuristic function named 'select_neighbor' that selects one solution from the archive and apply a novel or hybrid local search operator to generate a neighbor solution from it.  Must always ensure that the generated neighbor solution remains feasible, i.e., the solution must represent a valid TSP tour: it visits each node exactly once, ensuring no node is skipped or revisited.Please perform an intelligent random selection from among the solutions that show promising potential for further local improvement. Using a creative local search strategy that you design yourself, avoid 2-opt, go beyond standard approaches to design a method that yields higher-quality solutions across multiple objectives. The function should return the new neighbor solution.
+[2025-11-07 15:02:46] profile.py(240) :   - use_numba_accelerate: False
+[2025-11-07 15:02:46] profile.py(240) :   - use_protected_div: False
+[2025-11-07 15:02:46] profile.py(240) :   - protected_div_delta: 1e-05
+[2025-11-07 15:02:46] profile.py(240) :   - random_seed: None
+[2025-11-07 15:02:46] profile.py(240) :   - timeout_seconds: 60
+[2025-11-07 15:02:46] profile.py(240) :   - exec_code: True
+[2025-11-07 15:02:46] profile.py(240) :   - safe_evaluate: True
+[2025-11-07 15:02:46] profile.py(240) :   - daemon_eval_process: False
+[2025-11-07 15:02:46] profile.py(240) :   - n_instance: 4
+[2025-11-07 15:02:46] profile.py(240) :   - problem_size: 20
+[2025-11-07 15:02:46] profile.py(240) :   - ref_point: [1.1 1.1]
+[2025-11-07 15:02:46] profile.py(242) : ====================================================================
+[2025-11-07 15:02:46] profile.py(243) : Method Parameters
+[2025-11-07 15:02:46] profile.py(244) : --------------------------------------------------------------------
+[2025-11-07 15:02:46] profile.py(245) :   - Method: MOMCTS_AHD
+[2025-11-07 15:02:46] profile.py(249) :   - bounds: [[3, 3], [20, 20]]
+[2025-11-07 15:02:46] profile.py(249) :   - _max_sample_nums: 305
+[2025-11-07 15:02:46] profile.py(249) :   - lambda_0: 0.01
+[2025-11-07 15:02:46] profile.py(249) :   - alpha: 0.4
+[2025-11-07 15:02:46] profile.py(249) :   - _init_pop_size: 5
+[2025-11-07 15:02:46] profile.py(249) :   - _pop_size: 10
+[2025-11-07 15:02:46] profile.py(249) :   - _selection_num: 2
+[2025-11-07 15:02:46] profile.py(249) :   - review: True
+[2025-11-07 15:02:46] profile.py(249) :   - _num_samplers: 4
+[2025-11-07 15:02:46] profile.py(249) :   - _num_evaluators: 4
+[2025-11-07 15:02:46] profile.py(249) :   - _resume_mode: False
+[2025-11-07 15:02:46] profile.py(249) :   - _debug_mode: False
+[2025-11-07 15:02:46] profile.py(249) :   - _multi_thread_or_process_eval: thread
+[2025-11-07 15:02:46] profile.py(249) :   - _function_to_evolve_name: select_neighbor
+[2025-11-07 15:02:46] profile.py(249) :   - _tot_sample_nums: 0
+[2025-11-07 15:02:46] profile.py(249) :   - _initial_sample_nums_max: 50
+[2025-11-07 15:02:46] profile.py(249) :   - _evaluation_executor: <concurrent.futures.thread.ThreadPoolExecutor object at 0x1312df380>
+[2025-11-07 15:02:46] profile.py(251) : =====================================================================
+[2025-11-07 15:02:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:02:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:02:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:02:56] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:02:59] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:02] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:03] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:08] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:11] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:15] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:26] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:27] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:34] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:43] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:46] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:48] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:54] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:03:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:01] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:02] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:08] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:09] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:13] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:14] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:18] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:23] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:24] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:28] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:29] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:48] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:54] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:04:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:00] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:01] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:08] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:09] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:14] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:15] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:24] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:25] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:29] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:30] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:34] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:44] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:45] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:05:51] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:09] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:10] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:25] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:25] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:30] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:31] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:36] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:39] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:40] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:06:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:07:21] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:07:22] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:26] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:27] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:39] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:41] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:45] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:47] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:51] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:52] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:56] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:08:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:12] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:13] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:19] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:20] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:27] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:28] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:34] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:41] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:42] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:58] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:09:58] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:12] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:13] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:21] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:22] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:28] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:39] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:39] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:45] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:46] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:56] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:10:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:03] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:04] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:20] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:20] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:25] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:27] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:33] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:34] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:42] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:45] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:48] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:11:56] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:03] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:04] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:10] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:11] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:18] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:19] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:22] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:23] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:29] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:29] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:33] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:34] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:38] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:39] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:48] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:12:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:04] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:05] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:10] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:11] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:18] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:19] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:24] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:25] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:32] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:33] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:42] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:43] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:45] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:46] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:54] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:13:55] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:15:03] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:15:10] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:16] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:17] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:30] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:36] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:43] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:43] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:50] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:56] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:16:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:02] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:03] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:07] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:08] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:15] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:16] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:35] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:36] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:41] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:41] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:48] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:49] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:17:57] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:18:04] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
+[2025-11-07 15:18:04] _client.py(1025) : HTTP Request: POST https://api.mistral.ai/v1/chat/completions "HTTP/1.1 200 OK"
