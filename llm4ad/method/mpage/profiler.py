@@ -85,7 +85,7 @@ class EoHProfiler(ProfilerBase):
 
         print(f"Record type is: {record_type}")
         if record_type == 'history':
-            lower_bound = (sample_order - 1 // record_sep) * record_sep
+            lower_bound = ((sample_order - 1) // record_sep) * record_sep
             upper_bound = lower_bound + record_sep
             filename = f'samples_{lower_bound + 1}~{upper_bound}.json'
         else:

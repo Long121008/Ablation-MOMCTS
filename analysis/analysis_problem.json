@@ -1,36 +1,32 @@
 {
     "tsp_semo": {
          "MoMCTS": [
-            "logs/momcts/tsp_semo/codestral_v1_tune/samples/samples_1~300.json",
-            "logs/momcts/tsp_semo/codestral_v2_tune/samples/samples_1~300.json",
-            "logs/momcts/tsp_semo/codestral_v3_tune/samples/samples_1~300.json"
+            "logs/momcts/tsp_semo/nhv_runtime/v1/samples/samples_1~300.json",
+            "logs/momcts/tsp_semo/nhv_runtime/v2/samples/samples_1~300.json"
 
         ],
         "MPaGe": [
-            "logs/mpage/tsp_semo/codestral_v3_300/samples/samples_0~300.json",
-            "logs/mpage/tsp_semo/codestral_v1_300/samples/samples_0~300.json"        
+           "logs/mpage/tsp_semo/nhv_runtime/v1/samples/samples_1~300.json",
+           "logs/mpage/tsp_semo/nhv_runtime/v2/samples/samples_1~300.json",
+           "logs/mpage/tsp_semo/nhv_runtime/v3/samples/samples_1~300.json"
         ],
         
         "NSGA2": [
-            "logs/nsga2/tsp_semo/codestral_300_v1/samples/samples_0~300.json",
-            "logs/nsga2/tsp_semo/codestral_300_v2/samples/samples_0~300.json",
-            "logs/nsga2/tsp_semo/codestral_300_v3/samples/samples_0~300.json"
+            "logs/nsga2/tsp_semo/nhv_runtime/v1/samples/samples_1~300.json",
+            "logs/nsga2/tsp_semo/nhv_runtime/v2/samples/samples_1~300.json",
+            "logs/nsga2/tsp_semo/nhv_runtime/v3/samples/samples_1~300.json"
         ],
         "MEOH": [
-            "logs/meoh/tsp_semo/codestral_v1_latest_sort/samples/samples_0~300.json",
-            "logs/meoh/tsp_semo/codestral_v2_latest_sort/samples/samples_0~300.json",
-            "logs/meoh/tsp_semo/codestral_v3_latest_sort/samples/samples_0~300.json"
+            "logs/meoh/tsp_semo/nhv_runtime/v1/samples/samples_1~300.json",
+            "logs/meoh/tsp_semo/nhv_runtime/v2/samples/samples_1~300.json",
+            "logs/meoh/tsp_semo/nhv_runtime/v3/samples/samples_1~300.json"
+            
         ],
         "MOMEA": [
-            "logs/moead/tsp_semo/v1/samples/samples_0~300.json",
-            "logs/moead/tsp_semo/v2/samples/samples_0~300.json",
-            "logs/moead/tsp_semo/v3/samples/samples_0~300.json"
+            "logs/moead/tsp_semo/nhv_runtime/v1/samples/samples_1~300.json",
+            "logs/moead/tsp_semo/nhv_runtime/v2/samples/samples_1~300.json",
+            "logs/moead/tsp_semo/nhv_runtime/v3/samples/samples_1~300.json"
 
-        ], 
-        "MOMCTS_Weight_Sum": [
-            "logs/momcts_weight_sum/tsp_semo/v1_raw_obj/samples/samples_1~300.json",
-            "logs/momcts_weight_sum/tsp_semo/v2/samples/samples_1~300.json",
-            "logs/momcts_weight_sum/tsp_semo/v3/samples/samples_1~300.json"
         ]
     },
     "bi_kp": {

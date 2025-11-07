@@ -31,8 +31,8 @@ task_map = {
 # Change variable here
 ALGORITHM_NAME = 'momcts'  # Could also be 'MEoH' or 'NSGA2'
 PROBLEM_NAME = "tsp_semo" # Could also be "tsp_semo, bi_kp, bi_cvrp"
-exact_log_dir_name = "nhv_runtime/v1" # must be unique here
-api_key = os.getenv('API_KEY1') # change APIKEY1, APIKEY2, APIKEY3
+exact_log_dir_name = "nhv_runtime/v2" # must be unique here
+api_key = os.getenv('API_KEY4') # change APIKEY1, APIKEY2, APIKEY3
 
 if __name__ == '__main__':
     
