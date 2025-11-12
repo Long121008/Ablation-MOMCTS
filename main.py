@@ -1,6 +1,7 @@
 from llm4ad.task.optimization.bi_tsp_semo import BITSPEvaluation
 from llm4ad.task.optimization.bi_kp import BIKPEvaluation
 from llm4ad.task.optimization.bi_cvrp import BICVRPEvaluation
+from llm4ad.task.optimization.tri_tsp_semo import TRITSPEvaluation
 
 from llm4ad.tools.llm.llm_api_codestral import MistralApi
 
@@ -26,12 +27,13 @@ task_map = {
     "tsp_semo": BITSPEvaluation(),
     "bi_kp": BIKPEvaluation(),
     "bi_cvrp": BICVRPEvaluation(),
+    "tri_tsp": TRITSPEvaluation()
 }
 
 # Change variable here
-ALGORITHM_NAME = 'momcts'  # Could also be 'MEoH' or 'NSGA2'
-PROBLEM_NAME = "bi_kp" # Could also be "tsp_semo, bi_kp, bi_cvrp"
-exact_log_dir_name = "nhv_runtime/v6" # must be unique here
+ALGORITHM_NAME = 'meoh'  # Could also be 'MEoH' or 'NSGA2'
+PROBLEM_NAME = "tri_tsp" # Could also be "tsp_semo, bi_kp, bi_cvrp"
+exact_log_dir_name = "nhv_runtime/v1" # must be unique here
 api_key = os.getenv('API_KEY1') # change APIKEY1, APIKEY2, APIKEY3
 
 if __name__ == '__main__':

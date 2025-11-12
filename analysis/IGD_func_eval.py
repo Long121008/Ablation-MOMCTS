@@ -8,28 +8,55 @@ from utils import read_score_from_path
 
 
 
-def calculate_igd_from_path(json_path: str, true_pf_approx: np.ndarray, max_eval=300, step=10) -> dict:
-    """
-    Calculate IGD progression for one run (one JSON file).
-    """
+# def calculate_igd_from_path(json_path: str, true_pf_approx: np.ndarray, max_eval=300, step=10) -> dict:
+#     """
+#     Calculate IGD progression for one run (one JSON file).
+#     """
+#     F_hist = read_score_from_path(json_path)
+#     F_hist = np.array(F_hist)
+#     if len(F_hist) == 0:
+#         return {}
+
+#     target_evals = list(range(0, max_eval + 1, step))
+#     igd_at_targets = {}
+
+#     metric = IGD(true_pf_approx, zero_to_one=True)
+
+#     for target in target_evals:
+#         archive = F_hist[:target + 1]
+#         if len(archive) == 0:
+#             continue
+
+#         nd_idx = NonDominatedSorting().do(np.array(archive), only_non_dominated_front=True)
+#         P = np.array(archive)[nd_idx]
+#         igd_at_targets[target] = metric.do(P)
+
+#     return igd_at_targets
+
+def calculate_igd_from_path(json_path: str, true_pf_approx: np.ndarray,
+                            ideal: np.ndarray, nadir: np.ndarray,
+                            max_eval=300, step=10) -> dict:
     F_hist = read_score_from_path(json_path)
-    F_hist = np.array(F_hist)
+    F_hist = np.array(F_hist, dtype=float)
     if len(F_hist) == 0:
         return {}
 
+    # Normalize
+    F_hist = (F_hist - ideal) / (nadir - ideal)
+    true_pf_norm = (true_pf_approx - ideal) / (nadir - ideal)
+
+    metric = IGD(true_pf_norm)
+
     target_evals = list(range(0, max_eval + 1, step))
     igd_at_targets = {}
-
-    metric = IGD(true_pf_approx, zero_to_one=True)
 
     for target in target_evals:
         archive = F_hist[:target + 1]
         if len(archive) == 0:
             continue
-
-        nd_idx = NonDominatedSorting().do(np.array(archive), only_non_dominated_front=True)
-        P = np.array(archive)[nd_idx]
-        igd_at_targets[target] = metric.do(P)
+        nd_idx = NonDominatedSorting().do(archive, only_non_dominated_front=True)
+        P = archive[nd_idx]
+        igd_at_targets[target] = metric(P)
 
     return igd_at_targets
 
@@ -97,7 +124,7 @@ def compare_igd_curves_multi(algorithms: dict, true_pf_approx: np.ndarray, max_e
 
     plt.xlabel("Function Evaluations")
     plt.ylabel("IGD")
-    plt.ylim(0, 1)
+    plt.ylim(0.08, 0.2)
     plt.title("IGD Comparison (Mean ± Std across runs)")
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.legend()

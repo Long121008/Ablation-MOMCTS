@@ -68,6 +68,7 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
                 hv_values.append(hv)
 
             expected_len = max_samples // batch_size
+            
             if len(hv_values) < expected_len:
                 hv_values += [hv_values[-1]] * (expected_len - len(hv_values))
 

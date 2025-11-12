@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 import numpy as np
+from pymoo.indicators.hv import Hypervolume
 from llm4ad.base import Evaluation
 from llm4ad.task.optimization.tri_tsp_semo.get_instance import GetData
 from llm4ad.task.optimization.tri_tsp_semo.template import template_program, task_description
@@ -68,35 +69,58 @@ def check_constraint(solution, problem_size):
 
 
 def evaluate(instance_data, n_instance, problem_size, ref_point, eva: callable):
-        obj_1 = np.ones(n_instance)
-        obj_2 = np.ones(n_instance)
-        obj_3 = np.ones(n_instance)
-        n_ins = 0
-        for instance, distance_matrix_1, distance_matrix_2, distance_matrix_3 in instance_data:
-            start = time.time()
-            s = [random_solution(problem_size) for _ in range(100)]
-            Archive = [(s_, tour_cost(instance, s_, problem_size)) for s_ in s]
-            for _ in range(20000):
-                s_prime = eva(Archive, instance, distance_matrix_1, distance_matrix_2, distance_matrix_3)
-                f_s_prime = tour_cost(instance, s_prime, problem_size)
-                if not check_constraint(s_prime, problem_size):
-                    continue
+    obj_1 = np.ones(n_instance)
+    obj_2 = np.ones(n_instance)
+    final_list = []
+    all_objs = []
 
-                # Nếu không bị thống trị
-                if not any(dominates(f_a, f_s_prime) for _, f_a in Archive):
-                    # Loại bỏ các phần tử bị thống trị bởi f_s_prime
-                    Archive = [(a, f_a) for a, f_a in Archive if not dominates(f_s_prime, f_a)]
-                    # Thêm nghiệm mới
-                    Archive.append((s_prime, f_s_prime))
-            end = time.time()
-            objs = np.array([obj for _, obj in Archive])
-            # Tính HV
-            hv_indicator = HV(ref_point=ref_point)
-            hv_value = hv_indicator(objs)
-            obj_1[n_ins] = -hv_value
-            obj_2[n_ins] = end - start
-            n_ins += 1
-        return np.mean(obj_1), np.mean(obj_2)
+    Archives = []
+    times = []
+
+    # --- Run once and collect results ---
+    for _, (instance, dist1, dist2, dist3) in enumerate(instance_data):
+        start = time.time()
+        s = [random_solution(problem_size) for _ in range(100)]
+        Archive = [(s_, tour_cost(instance, s_, problem_size)) for s_ in s]
+
+        for _ in range(2000):
+            s_prime = eva(Archive, instance, dist1, dist2, dist3)
+            if not check_constraint(s_prime, problem_size):
+                continue
+            f_s_prime = tour_cost(instance, s_prime, problem_size)
+            if not any(dominates(f_a, f_s_prime) for _, f_a in Archive):
+                Archive = [(a, f_a) for a, f_a in Archive if not dominates(f_s_prime, f_a)]
+                Archive.append((s_prime, f_s_prime))
+
+        end = time.time()
+        objs = np.array([obj for _, obj in Archive])
+        all_objs.append(objs)
+        Archives.append(objs)
+        times.append(end - start)
+
+    # --- Global normalization ---
+    all_objs_concat = np.vstack(all_objs)
+    z_ideal = np.min(all_objs_concat, axis=0)
+    z_nadir = np.max(all_objs_concat, axis=0)
+    print(f"Z_ideal of the instance: {z_ideal}")
+    print(f"Z_nadir of the instance: {z_nadir}")
+
+    hv_indicator = Hypervolume(
+        ref_point=ref_point,
+        norm_ref_point=False,
+        zero_to_one=True,
+        ideal=z_ideal,
+        nadir=z_nadir
+    )
+
+    for n_ins, (objs, t) in enumerate(zip(Archives, times)):
+        hv_value = hv_indicator(objs)
+        obj_1[n_ins] = -hv_value
+        obj_2[n_ins] = t
+        final_list.append(objs.tolist())
+
+    return np.mean(obj_1), np.mean(obj_2)
+
             
 
 
@@ -127,7 +151,7 @@ class TRITSPEvaluation(Evaluation):
         self.problem_size = 20 
         getData = GetData(self.n_instance, self.problem_size)
         self._datasets = getData.generate_instances()
-        self.ref_point = np.array([20.0,20.0, 20.0])
+        self.ref_point = np.array([1.1, 1.1, 1.1])
 
     def evaluate_program(self, program_str: str, callable_func: callable):
         return evaluate(self._datasets,self.n_instance,self.problem_size, self.ref_point, callable_func)

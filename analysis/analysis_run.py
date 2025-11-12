@@ -33,11 +33,11 @@ def run_analysis(metric="pareto", problem="tsp_semo"):
         compare_igd_curves_multi(algorithms, true_pf_approx, max_eval=300)
 
     elif metric == "pareto":
-        compare_pareto_from_algorithms(algorithms, show_global=False)
+        compare_pareto_from_algorithms(algorithms, show_global=True)
 
     else:
         raise ValueError(f"Unknown metric: {metric}")
 
 
 if __name__ == "__main__":
-    run_analysis(metric="igd", problem="bi_kp")
+    run_analysis(metric="pareto", problem="tsp_semo")
