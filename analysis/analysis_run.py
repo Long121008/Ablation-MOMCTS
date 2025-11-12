@@ -40,4 +40,4 @@ def run_analysis(metric="pareto", problem="tsp_semo"):
 
 
 if __name__ == "__main__":
-    run_analysis(metric="pareto", problem="tsp_semo")
+    run_analysis(metric="pareto", problem="bi_kp")

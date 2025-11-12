@@ -29,18 +29,21 @@
         ]
     },
     "bi_kp": {
-        "MoMCTS": [
-                "logs/momcts/bi_kp/nhv_runtime/v1/samples/samples_1~300.json",
-                "logs/momcts/bi_kp/nhv_runtime/v2/samples/samples_1~300.json",
-                "logs/momcts/bi_kp/nhv_runtime/v5/samples/samples_1~300.json"
-            ],
+        "MOMCTS": [
+            "logs/momcts/bi_kp/nhv_runtime/v1/samples/samples_1~300.json",
+            "logs/momcts/bi_kp/nhv_runtime/v2/samples/samples_1~300.json",
+            "logs/momcts/bi_kp/nhv_runtime/v5/samples/samples_1~300.json",
+            "logs/momcts/bi_kp/nhv_runtime/v6/samples/samples_1~300.json"
+        ],
         "MoMCTS_Raw_Objective": [
             "logs/momcts/bi_kp/ablation_study_1_raw_objectives/v1/samples/samples_1~300.json",
             "logs/momcts/bi_kp/ablation_study_1_raw_objectives/v2/samples/samples_1~300.json",
             "logs/momcts/bi_kp/ablation_study_1_raw_objectives/v3/samples/samples_1~300.json"
         ],
         "MOMCTS_NHV_Selection_Only": [
-            "logs/momcts/bi_kp/nhv_runtime_nhv_only/v1/samples/samples_1~300.json"
+            "logs/momcts/bi_kp/nhv_runtime_nhv_only/v1/samples/samples_1~300.json",
+            "logs/momcts/bi_kp/nhv_runtime_nhv_only/v2/samples/samples_1~300.json",
+            "logs/momcts/bi_kp/nhv_runtime_nhv_only/v3/samples/samples_1~300.json"
         ],
         "MPage": [
             "logs/mpage/bi_kp/nhv_runtime/v1/samples/samples_1~300.json",

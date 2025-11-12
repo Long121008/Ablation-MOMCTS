@@ -151,29 +151,65 @@ def read_population_scores_from_folder(folder_path: str) -> list[list[float, flo
 
     return F_list
 
+from pathlib import Path
+import json
+import numpy as np
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
+
 def calculate_true_pareto_front(folder_list: list[str]) -> np.ndarray:
+    """
+    Aggregate Pareto front points from multiple folders, ignoring 'raw_objective' folders.
+    
+    Parameters:
+        folder_list (list[str]): List of folder paths to search.
+    
+    Returns:
+        np.ndarray: Approximation of the true Pareto front.
+    """
     full_scores = []
-    file_path_name = ["samples_1~200.json", "samples_0~200.json", "samples_1~300.json", "samples_0~300.json"]
+    file_path_name = [
+        "samples_1~200.json",
+        "samples_0~200.json",
+        "samples_1~300.json",
+        "samples_0~300.json"
+    ]
+    
     for folder in folder_list:
         folder_path = Path(folder)
+        # Skip folders explicitly named "raw_objective"
+        if folder_path.name == "raw_objective":
+            print(f"Skipping folder: {folder_path}")
+            continue
+        
         for name in file_path_name:
             for file_path in folder_path.rglob(name):  # recursive search
+                # Skip any path that contains "raw_objective" in its parents
+                if "raw_objective" in [p.name for p in file_path.parents]:
+                    continue
+
                 try:
                     print(f"Get from file path: {file_path}")
                     with open(file_path, "r") as f:
                         data = json.load(f)
+
+                    # Collect `score` values
                     scores = [item.get("score") for item in data if item.get("score") is not None]
-                    scores = [[x for x in pair] for pair in scores]
-                    full_scores.extend(scores)
-                    
-                    scores = [item.get("metric_score") for item in data if item.get("metric_score") is not None]
-                    scores = [[x for x in pair] for pair in scores]
-                    full_scores.extend(scores)
+                    full_scores.extend([list(x) for x in scores if isinstance(x, (list, tuple))])
+
+                    # Collect `metric_score` values
+                    metric_scores = [item.get("metric_score") for item in data if item.get("metric_score") is not None]
+                    full_scores.extend([list(x) for x in metric_scores if isinstance(x, (list, tuple))])
+
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
-    
+
+    if not full_scores:
+        print("⚠️ No valid scores found.")
+        return np.array([])
+
     F_hist_np = np.array(full_scores)
     true_nd_indices = NonDominatedSorting().do(F_hist_np, only_non_dominated_front=True)
-    true_pf_approx = F_hist_np[true_nd_indices]  # get true Pareto front
+    true_pf_approx = F_hist_np[true_nd_indices]
     
+    print(f"✅ True Pareto front computed with {len(true_pf_approx)} non-dominated points.")
     return true_pf_approx
