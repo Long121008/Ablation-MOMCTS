@@ -27,16 +27,17 @@ def run_analysis(metric="pareto", problem="tsp_semo"):
             f"logs/momcts/{problem}",
             f"logs/meoh/{problem}",
             f"logs/nsga2/{problem}",
-            f"logs/mpage/{problem}"
+            f"logs/mpage/{problem}",
+            f"logs/moead/{problem}"
         ])
-        compare_igd_curves_multi(algorithms, true_pf_approx)
+        compare_igd_curves_multi(algorithms, true_pf_approx, max_eval=300)
 
     elif metric == "pareto":
-        compare_pareto_from_algorithms(algorithms)
+        compare_pareto_from_algorithms(algorithms, show_global=False)
 
     else:
         raise ValueError(f"Unknown metric: {metric}")
 
 
 if __name__ == "__main__":
-    run_analysis(metric="igd", problem="tsp_semo")
+    run_analysis(metric="igd", problem="bi_kp")

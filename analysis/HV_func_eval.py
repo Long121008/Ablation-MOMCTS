@@ -32,8 +32,8 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
         raise ValueError("No valid data found in any file.")
 
     all_F_global = np.vstack(all_F_global)
-    z_ideal = all_F_global.min(axis=0)
-    z_nadir = all_F_global.max(axis=0)
+    z_ideal = [-1.5, 0]
+    z_nadir = [0, 10]
     print(f"\n🌍 Global Ideal: {z_ideal}, Nadir: {z_nadir}")
 
     # Reference point (slightly worse than nadir)
@@ -67,6 +67,10 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
                 hv = metric(F_subset)
                 hv_values.append(hv)
 
+            expected_len = max_samples // batch_size
+            if len(hv_values) < expected_len:
+                hv_values += [hv_values[-1]] * (expected_len - len(hv_values))
+
             hv_runs.append(hv_values)
 
         if not hv_runs:
@@ -89,9 +93,11 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
         # --- Step 4: Visualization ---
         if visualize:
             plt.plot(batches, mean_hv, marker='o', label=algo)
-            plt.fill_between(batches, mean_hv - std_hv, mean_hv + std_hv, alpha=0.3)
+            plt.fill_between(batches, mean_hv - std_hv, mean_hv + std_hv, alpha=0.25)
 
     if visualize:
+        plt.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.tab10.colors)
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.xlabel(f"Number of Samples (batch size = {batch_size})")
         plt.ylabel("Hypervolume (HV)")
         plt.title("HV Progression per Algorithm (Mean ± Std)")

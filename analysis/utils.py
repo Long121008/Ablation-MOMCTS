@@ -83,6 +83,16 @@ def read_score_from_path(json_data: str) -> List[List[float]]:
             except Exception:
                 skip_item_num += 1
                 print("Warning: Skipping item due to non-numeric 'score'.")
+        
+        elif 'metric_score' in item and isinstance(item['metric_score'], list) and len(item['metric_score']) == 2:
+            try:
+                s0 = float(item['metric_score'][0])
+                s1 = float(item['metric_score'][1])
+                scores.append([s0, s1])
+            except Exception:
+                skip_item_num += 1
+                print("Warning: Skipping item due to non-numeric 'score'.")
+        
         else:
             skip_item_num += 1
             print("Warning: Skipping item due to invalid or missing 'score'.")
@@ -127,9 +137,15 @@ def read_population_scores_from_folder(folder_path: str) -> list[list[float, flo
         F = []
         for x in data["content"]:
             if mark == 0:
-                obj, runtime = x["score"]
+                if "score" in x:
+                    obj, runtime = x["score"]
+                elif "metric_score" in x:
+                    obj, runtime = x["metric_score"]
             else:
-                obj, runtime = x["score"]
+                if "score" in x:
+                    obj, runtime = x["score"]
+                elif "metric_score" in x:
+                    obj, runtime = x["metric_score"]
             F.append([obj, runtime])
         F_list.append(F)
 
@@ -147,6 +163,10 @@ def calculate_true_pareto_front(folder_list: list[str]) -> np.ndarray:
                     with open(file_path, "r") as f:
                         data = json.load(f)
                     scores = [item.get("score") for item in data if item.get("score") is not None]
+                    scores = [[x for x in pair] for pair in scores]
+                    full_scores.extend(scores)
+                    
+                    scores = [item.get("metric_score") for item in data if item.get("metric_score") is not None]
                     scores = [[x for x in pair] for pair in scores]
                     full_scores.extend(scores)
                 except Exception as e:
