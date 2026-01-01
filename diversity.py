@@ -7,7 +7,7 @@ from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.cluster.hierarchy import linkage, fcluster
-from scipy.spatial.distance import squareform, euclidean
+from scipy.spatial.distance import squareform, euclidean,pdist
 from scipy.sparse.csgraph import minimum_spanning_tree
 
 def load_programs_from_files(file_paths):
@@ -31,32 +31,46 @@ def load_programs_from_files(file_paths):
 
 def embed_programs(programs, model, tokenizer, device):
     embeddings = []
-
+    model.eval()
+    
     for prog in tqdm(programs):
+        # 1. Quan trọng: Thêm padding và return_attention_mask
         inputs = tokenizer(
-            prog,
-            return_tensors="pt",
-            truncation=True,
-            max_length=512
+            prog, 
+            return_tensors="pt", 
+            truncation=True, 
+            max_length=512,
+            padding=True
         ).to(device)
 
         with torch.no_grad():
+            # 2. Với CodeT5p-embedding, sử dụng phương thức encoder hoặc chuẩn hóa đầu ra
             outputs = model(**inputs)
-
-            if isinstance(outputs, torch.Tensor):
-                hidden = outputs
+            
+            # Lấy vector đại diện (thường là hidden state của token đầu tiên hoặc mean pooling)
+            if hasattr(outputs, 'last_hidden_state'):
+                # Mean pooling kèm attention mask để loại bỏ phần padding
+                attention_mask = inputs['attention_mask']
+                token_embeddings = outputs.last_hidden_state
+                input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+                emb = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
             else:
-                hidden = outputs.last_hidden_state
+                emb = outputs
 
-            emb = hidden.mean(dim=1).squeeze(0)
+            emb = torch.nn.functional.normalize(emb, p=2, dim=1)
+            embeddings.append(emb.cpu().numpy().flatten())
 
-        embeddings.append(emb.cpu().numpy())
+    res = np.vstack(embeddings).astype(np.float64) # Ép kiểu cao hơn để tính toán chính xác
+    
+    # Debug giá trị
+    print(f"\n[DEBUG] Min/Max value in emb: {res.min()} / {res.max()}")
+    print(f"[DEBUG] Unique vectors: {np.unique(res, axis=0).shape}")
+    
+    return res
 
-    return np.vstack(embeddings)
 
 
-
-def compute_metrics(embeddings, threshold=0.8):
+def compute_metrics(embeddings, threshold=0.95):
     """Tính toán CDI và SWDI."""
     n = len(embeddings)
     if n < 2: return 0.0, 0.0, 1
@@ -78,14 +92,23 @@ def compute_metrics(embeddings, threshold=0.8):
     else:
         cdi = 0.0
 
-    sim_matrix = cosine_similarity(embeddings)
-    dist_matrix_cosine = np.clip(1 - sim_matrix, 0, None)
-    np.fill_diagonal(dist_matrix_cosine, 0)
+
+    dist_vec_cosine = pdist(embeddings, metric='cosine')
     
-    Z = linkage(squareform(dist_matrix_cosine), method='complete')
-    labels = fcluster(Z, t=1-threshold, criterion='distance')
+    if np.max(dist_vec_cosine) < 1e-7:
+        dist_vec_cosine = np.zeros_like(dist_vec_cosine)
+    # ------------------------------------------
+
+    Z = linkage(dist_vec_cosine, method='complete')
     
-    probs = np.bincount(labels)[1:] / n 
+    print(f"Max distances in linkage: {Z[-3:, 2]}") 
+    
+    # t là khoảng cách (distance = 1 - similarity)
+    # Nếu bạn muốn similarity 0.99, thì t = 0.01
+    labels = fcluster(Z, t=max(1e-5, 1-threshold), criterion='distance')
+    
+    counts = np.bincount(labels)
+    probs = counts[counts > 0] / n 
     swdi = float(-np.sum(probs * np.log(probs + 1e-10)))
     
     return cdi, swdi, len(probs)
@@ -110,6 +133,8 @@ def run_comparative_analysis(
         print(f"\n>>> Đang xử lý nhóm: {exp_name}")
 
         programs = load_programs_from_files(file_list)
+        print(programs[0][:100])
+        print(programs[1][:100]) # Xem 2 chương trình đầu có khác nhau không
         programs = programs[:max_samples]
 
         if len(programs) < step:
@@ -155,11 +180,8 @@ if __name__ == "__main__":
 
     DATA_CONFIG = {
         "Version_1": [
-            "logs/momcts/bi_cvrp/nhv_runtime/v1/samples/samples_1~300.json"
+            "logs/mpage/bi_cvrp/nhv_runtime/v1/samples/samples_1~300.json"
         ],
-        "Version_2": [
-            "logs/momcts/bi_cvrp/nhv_runtime/v2/samples/samples_1~300.json"
-        ]
     }
 
     try:
