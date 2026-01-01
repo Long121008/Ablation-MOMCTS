@@ -7,8 +7,11 @@ from llm4ad.tools.llm.llm_api_codestral import MistralApi
 
 from llm4ad.method.momcts import MOMCTS_AHD, MOMCTSProfiler
 from llm4ad.method.meoh import MEoH, MEoHProfiler
+from llm4ad.method.eoh import EoH, EoHProfiler
+from llm4ad.method.reevo import ReEvo, ReEvoProfiler
+from llm4ad.method.hsevo import HSEvo, HSEvoProfiler
 from llm4ad.method.nsga2 import NSGA2, NSGA2Profiler
-from llm4ad.method.mpage import EoHProfiler, MPaGE
+from llm4ad.method.mpage import MPaGEProfiler, MPaGE
 from llm4ad.method.moead import MOEAD, MOEADProfiler
 import os
 from dotenv import load_dotenv
@@ -18,8 +21,11 @@ load_dotenv()
 algorithm_map = {
     'momcts': (MOMCTS_AHD, MOMCTSProfiler),
     'meoh': (MEoH, MEoHProfiler),
+    'eoh': (EoH, EoHProfiler),
+    'reevo': (ReEvo, ReEvoProfiler),
+    'hsevo': (HSEvo, HSEvoProfiler),
     'nsga2': (NSGA2, NSGA2Profiler),
-    'mpage': (MPaGE, EoHProfiler),
+    'mpage': (MPaGE, MPaGEProfiler),
     'moead': (MOEAD, MOEADProfiler)
 }
 
@@ -31,9 +37,9 @@ task_map = {
 }
 
 # Change variable here
-ALGORITHM_NAME = 'nsga2'  # Could also be 'MEoH' or 'NSGA2'
+ALGORITHM_NAME = 'eoh'  # Could also be 'MEoH' or 'NSGA2'
 PROBLEM_NAME = "tsp_semo" # Could also be "tsp_semo, bi_kp, bi_cvrp"
-exact_log_dir_name = "nhv_runtime_50/v2" # must be unique here
+exact_log_dir_name = "nhv_runtime_50/v1" # must be unique here
 api_key = os.getenv('API_KEY3') # change APIKEY1, APIKEY2, APIKEY3
 
 if __name__ == '__main__':

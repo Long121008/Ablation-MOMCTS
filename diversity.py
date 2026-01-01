@@ -1,149 +1,168 @@
 import json
-from sklearn.cluster import KMeans
 import torch
 import numpy as np
-import glob
 import os
-from transformers import AutoModel, AutoTokenizer
-from sklearn.metrics.pairwise import cosine_distances
-import matplotlib.pyplot as plt
-def load_programs_from_multiple_files(file_paths):
-    all_programs = []
+from tqdm import tqdm
 
+from transformers import AutoModel, AutoTokenizer
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.spatial.distance import squareform, euclidean
+from scipy.sparse.csgraph import minimum_spanning_tree
+
+def load_programs_from_files(file_paths):
+    seen = set()
+    programs = []
     for path in file_paths:
         if not os.path.exists(path):
-            print(f"Cảnh báo: Không tìm thấy file {path}")
+            print(f"  Cảnh báo: Không tìm thấy file {path}")
             continue
-            
         with open(path, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-                count = 0
-                for item in data:
-                    prog = item.get("function") or item.get("program", "")
-                    if isinstance(prog, str) and len(prog.strip()) > 0:
-                        all_programs.append(prog.strip())
-                        count += 1
-                print(f"Đã load {count} chương trình từ: {path}")
-            except Exception as e:
-                print(f"Lỗi khi đọc file {path}: {e}")
+            data = json.load(f)
+            for item in data:
+                prog = item.get("function") or item.get("program", "")
+                if isinstance(prog, str):
+                    prog = prog.strip()
+                    if prog and prog not in seen:
+                        seen.add(prog)
+                        programs.append(prog)
+    return programs
 
-    unique_programs = list(set(all_programs))
+
+def embed_programs(programs, model, tokenizer, device):
+    embeddings = []
+
+    for prog in tqdm(programs):
+        inputs = tokenizer(
+            prog,
+            return_tensors="pt",
+            truncation=True,
+            max_length=512
+        ).to(device)
+
+        with torch.no_grad():
+            outputs = model(**inputs)
+
+            if isinstance(outputs, torch.Tensor):
+                hidden = outputs
+            else:
+                hidden = outputs.last_hidden_state
+
+            emb = hidden.mean(dim=1).squeeze(0)
+
+        embeddings.append(emb.cpu().numpy())
+
+    return np.vstack(embeddings)
+
+
+
+def compute_metrics(embeddings, threshold=0.8):
+    """Tính toán CDI và SWDI."""
+    n = len(embeddings)
+    if n < 2: return 0.0, 0.0, 1
+
+    # 1. Tính CDI (Dựa trên Minimum Spanning Tree)
+    dist_matrix_euclidean = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            d = euclidean(embeddings[i], embeddings[j])
+            dist_matrix_euclidean[i, j] = dist_matrix_euclidean[j, i] = d
+
+    mst = minimum_spanning_tree(dist_matrix_euclidean).toarray()
+    mst_edges = mst[mst != 0]
+    total_weight = np.sum(mst_edges)
+    if total_weight > 0 and len(mst_edges) > 1:
+        p = mst_edges / total_weight
+        cdi = -np.sum(p * np.log(p))
+        cdi = cdi / np.log(len(mst_edges))   # normalize to [0,1]
+    else:
+        cdi = 0.0
+
+    sim_matrix = cosine_similarity(embeddings)
+    dist_matrix_cosine = np.clip(1 - sim_matrix, 0, None)
+    np.fill_diagonal(dist_matrix_cosine, 0)
     
-    if len(unique_programs) < 2:
-        raise ValueError("Không đủ dữ liệu chương trình độc nhất để tính toán.")
-
-    print(f"\n--- Tổng cộng ---")
-    print(f"Tổng số mẫđộcu thu thập: {len(all_programs)}")
-    print(f"Số lượng mẫu  nhất (Unique): {len(unique_programs)}")
+    Z = linkage(squareform(dist_matrix_cosine), method='complete')
+    labels = fcluster(Z, t=1-threshold, criterion='distance')
     
-    return unique_programs
+    probs = np.bincount(labels)[1:] / n 
+    swdi = float(-np.sum(probs * np.log(probs + 1e-10)))
+    
+    return cdi, swdi, len(probs)
 
-def embed_programs(programs):
+def run_comparative_analysis(
+    experiments_dict,
+    output_file="cdi_swdi_progressive.json",
+    step=10,
+    max_samples=300
+):
     model_name = "Salesforce/codet5p-110m-embedding"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    print(f"\nĐang tải model {model_name}...")
+
+    print(f"Đang khởi tạo model {model_name}...")
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
-    
-    embeddings = []
-    print(f"Đang tạo embeddings trên {device} cho {len(programs)} mẫu...")
-    
-    for i, prog in enumerate(programs):
-        inputs = tokenizer(prog, return_tensors="pt", truncation=True, max_length=512).to(device)
-        with torch.no_grad():
-            embedding = model(**inputs).cpu().numpy()
-            embeddings.append(embedding[0])
-        
-        if (i + 1) % 50 == 0:
-            print(f"Đã xử lý: {i+1}/{len(programs)}")
-            
-    return np.array(embeddings)
+    model.eval()
 
-def compute_metrics(embeddings, n_clusters=None, random_state=42):
-    dist_matrix = cosine_distances(embeddings)
-    n = dist_matrix.shape[0]
+    all_results = {}
 
-    min_dists = [np.min(np.delete(dist_matrix[i], i)) for i in range(n)]
-    cdi = float(np.mean(min_dists))
+    for exp_name, file_list in experiments_dict.items():
+        print(f"\n>>> Đang xử lý nhóm: {exp_name}")
 
-    if n_clusters is None:
-        n_clusters = int(np.sqrt(n)) 
+        programs = load_programs_from_files(file_list)
+        programs = programs[:max_samples]
 
-    n_clusters = min(n_clusters, n)
+        if len(programs) < step:
+            print("  Không đủ dữ liệu.")
+            continue
 
-    kmeans = KMeans(
-        n_clusters=n_clusters,
-        random_state=random_state,
-        n_init=10
-    )
-    labels = kmeans.fit_predict(embeddings)
+        # ---- Embed ONE TIME ----
+        embeddings = embed_programs(programs, model, tokenizer, device)
 
-    cluster_sizes = np.bincount(labels)
-    M = np.sum(cluster_sizes)
+        exp_results = []
 
-    probs = cluster_sizes / M
-    probs = probs[probs > 0]  
+        for k in range(step, len(programs) + 1, step):
+            sub_emb = embeddings[:k]
 
-    swdi = float(-np.sum(probs * np.log(probs)))
+            cdi, swdi, num_clusters = compute_metrics(sub_emb)
 
-    return cdi, swdi, n_clusters
+            exp_results.append({
+                "samples": k,
+                "cdi": cdi,
+                "swdi": swdi,
+                "clusters": num_clusters
+            })
 
+            print(
+                f"  [{exp_name}] k={k:3d} | "
+                f"CDI={cdi:.4f} | SWDI={swdi:.4f} | clusters={num_clusters}"
+            )
 
-def run_multi_file_analysis_with_plot(file_list):
-    """
-    Process multiple files, compute metrics, and plot the results.
-    """
-    results = []
-    file_names = []
+        all_results[exp_name] = {
+            "total_samples": len(programs),
+            "step": step,
+            "metrics": exp_results
+        }
 
-    for file_path in file_list:
-        try:
-            print(f"\nĐang xử lý file: {file_path}")
-            unique_programs = load_programs_from_multiple_files([file_path])
-            embeddings = embed_programs(unique_programs)
-            cdi, swdi, k = compute_metrics(embeddings)
+    # ---- Save ----
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(all_results, f, ensure_ascii=False, indent=4)
 
-            results.append((cdi, swdi, k))
-            file_names.append(os.path.basename(file_path))
+    print(f"\n[✓] Saved progressive metrics to {output_file}")
 
-            print(f"CDI: {cdi:.6f}, SWDI: {swdi:.6f}, Clusters: {k}")
-        except Exception as e:
-            print(f"Lỗi khi xử lý file {file_path}: {e}")
-
-    # Plot the results
-    if results:
-        cdi_values = [res[0] for res in results]
-        swdi_values = [res[1] for res in results]
-        cluster_counts = [res[2] for res in results]
-
-        x = range(len(file_names))
-
-        plt.figure(figsize=(10, 6))
-        plt.plot(x, cdi_values, marker="o", label="CDI (Local Diversity)")
-        plt.plot(x, swdi_values, marker="s", label="SWDI (Global Diversity)")
-        plt.bar(x, cluster_counts, alpha=0.5, label="Number of Clusters")
-
-        plt.xticks(x, file_names, rotation=45, ha="right")
-        plt.xlabel("Files")
-        plt.ylabel("Metrics")
-        plt.title("Semantic Diversity Metrics Across Files")
-        plt.legend()
-        plt.tight_layout()
-        plt.grid(True, linestyle="--", alpha=0.7)
-        plt.show()
 
 if __name__ == "__main__":
-    LIST_OF_FILES = [
-        "logs/momcts/bi_cvrp/nhv_runtime/v1/samples/samples_1~300.json",
-        "logs/meoh/bi_cvrp/nhv_runtime/v2/samples/samples_1~300.json",
-        "logs/moead/bi_cvrp/nhv_runtime/v3/samples/samples_1~300.json",
-        "logs/mpage/bi_cvrp/nhv_runtime/v4/samples/samples_1~300.json",
-        "logs/nsga2/bi_cvrp/nhv_runtime/v4/samples/samples_1~300.json"
-    ]
+
+    DATA_CONFIG = {
+        "Version_1": [
+            "logs/momcts/bi_cvrp/nhv_runtime/v1/samples/samples_1~300.json"
+        ],
+        "Version_2": [
+            "logs/momcts/bi_cvrp/nhv_runtime/v2/samples/samples_1~300.json"
+        ]
+    }
 
     try:
-        run_multi_file_analysis_with_plot(LIST_OF_FILES)
+        run_comparative_analysis(DATA_CONFIG)
     except Exception as e:
-        print(f"Lỗi: {e}")
+        print(f"Lỗi hệ thống: {e}")

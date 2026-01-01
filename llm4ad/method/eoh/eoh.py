@@ -152,7 +152,9 @@ class EoH:
             if func is None:
                 print("New return in _sample_evaluate_register, eoh.py")
                 return False
-
+            
+            print(f"Func is: {func}")
+            
             program = TextFunctionProgramConverter.function_to_program(
                 func, self._template_program
             )
@@ -161,6 +163,7 @@ class EoH:
                 self._evaluator.evaluate_program_record_time, program
             ).result()  # score is 2D or None
 
+            print(f"Check score: {score}")
             if score is not None:
                 break
             else:
@@ -250,20 +253,19 @@ class EoH:
                     exit()
                 continue
 
-        # shutdown evaluation_executor
         try:
             self._evaluation_executor.shutdown(cancel_futures=True)
         except:
             pass
 
     def _iteratively_init_population(self):
-        """Let a thread repeat {sample -> evaluate -> register to population}
-        to initialize a population.
-        """
+       
         while self._population.generation == 0:
             try:
                 # get a new func using i1
                 prompt = EoHPrompt.get_prompt_i1(self._task_description_str, self._function_to_evolve)
+                
+                print(f"Check init prompt: {prompt}")
                 self._sample_evaluate_register(prompt)
                 if self._tot_sample_nums >= self._initial_sample_nums_max:
                     # print(f'Warning: Initialization not accomplished in {self._initial_sample_nums_max} samples !!!')
@@ -292,6 +294,7 @@ class EoH:
             t.join()
 
     def run(self):
+        print("Start running")
         if not self._resume_mode:
             # do initialization
             self._multi_threaded_sampling(self._iteratively_init_population)
