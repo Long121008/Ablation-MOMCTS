@@ -82,7 +82,6 @@ def read_score_from_path(json_data: str) -> List[List[float]]:
                 scores.append([s0, s1])
             except Exception:
                 skip_item_num += 1
-                print("Warning: Skipping item due to non-numeric 'score'.")
         
         elif 'metric_score' in item and isinstance(item['metric_score'], list) and len(item['metric_score']) == 2:
             try:
@@ -91,11 +90,9 @@ def read_score_from_path(json_data: str) -> List[List[float]]:
                 scores.append([s0, s1])
             except Exception:
                 skip_item_num += 1
-                print("Warning: Skipping item due to non-numeric 'score'.")
         
         else:
             skip_item_num += 1
-            print("Warning: Skipping item due to invalid or missing 'score'.")
     return scores
 
 def find_pareto_front_from_scores(scores: list[list[float, float]]):
@@ -157,15 +154,7 @@ import numpy as np
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
 def calculate_true_pareto_front(folder_list: list[str]) -> np.ndarray:
-    """
-    Aggregate Pareto front points from multiple folders, ignoring 'raw_objective' folders.
     
-    Parameters:
-        folder_list (list[str]): List of folder paths to search.
-    
-    Returns:
-        np.ndarray: Approximation of the true Pareto front.
-    """
     full_scores = []
     file_path_name = [
         "samples_1~200.json",
@@ -192,11 +181,9 @@ def calculate_true_pareto_front(folder_list: list[str]) -> np.ndarray:
                     with open(file_path, "r") as f:
                         data = json.load(f)
 
-                    # Collect `score` values
                     scores = [item.get("score") for item in data if item.get("score") is not None]
                     full_scores.extend([list(x) for x in scores if isinstance(x, (list, tuple))])
 
-                    # Collect `metric_score` values
                     metric_scores = [item.get("metric_score") for item in data if item.get("metric_score") is not None]
                     full_scores.extend([list(x) for x in metric_scores if isinstance(x, (list, tuple))])
 

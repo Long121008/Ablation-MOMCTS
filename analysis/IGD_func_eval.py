@@ -9,12 +9,10 @@ from utils import read_score_from_path
 
 
 def calculate_igd_from_path(json_path: str, true_pf_approx: np.ndarray, max_eval=300, step=10) -> dict:
-    """
-    Calculate IGD progression for one run (one JSON file).
-    """
     F_hist = read_score_from_path(json_path)
     F_hist = np.array(F_hist)
     if len(F_hist) == 0:
+        print(f"⚠️ Warning: No data found in file '{json_path}'.")
         return {}
 
     target_evals = list(range(0, max_eval + 1, step))
@@ -25,11 +23,28 @@ def calculate_igd_from_path(json_path: str, true_pf_approx: np.ndarray, max_eval
     for target in target_evals:
         archive = F_hist[:target + 1]
         if len(archive) == 0:
+            print(f"⚠️ Warning: Archive is empty at target evaluation {target}.")
             continue
 
         nd_idx = NonDominatedSorting().do(np.array(archive), only_non_dominated_front=True)
         P = np.array(archive)[nd_idx]
-        igd_at_targets[target] = metric.do(P)
+
+        # Debugging: Print shapes and content
+        print(f"Target Evaluation: {target}")
+        print(f"Archive Shape: {np.array(archive).shape}")
+        print(f"Non-Dominated Solutions Shape: {P.shape}")
+        print(f"True Pareto Front Approximation Shape: {true_pf_approx.shape}")
+
+        # Check for shape mismatch
+        if P.shape[1] != true_pf_approx.shape[1]:
+            continue
+
+        try:
+            igd_at_targets[target] = metric.do(P)
+        except ValueError as e:
+            print(f"❌ Error calculating IGD at target evaluation {target}: {e}")
+            print(f"P Content: {P}")
+            continue
 
     return igd_at_targets
 
@@ -72,6 +87,7 @@ def compare_igd_curves_multi(algorithms: dict, true_pf_approx: np.ndarray, max_e
     final_igd_summary = {}
 
     for label, paths in algorithms.items():
+        print(f"Check label: {label}")
         evals, mean_curve, std_curve = aggregate_igd_curves(paths, true_pf_approx, max_eval, step)
         if len(evals) == 0:
             print(f"⚠️ No valid data for {label}")

@@ -1,2 +1,2 @@
-from .eoh import MPaGE
-from .profiler import EoHProfiler
+from .mpage import MPaGE
+from .profiler import MPaGEProfiler

@@ -3,7 +3,9 @@ from . import (
     momcts,
     nsga2,
     mpage,
-    moead
+    moead,
+    eoh,
+    reevo
 )
 
 # try to import reevo

@@ -6,7 +6,7 @@ import os.path
 
 from tqdm.auto import tqdm
 
-from .eoh import EoH
+from .mpage import EoH
 from .profiler import EoHProfiler
 from .population import Population
 from ...base import TextFunctionProgramConverter as tfpc, Function

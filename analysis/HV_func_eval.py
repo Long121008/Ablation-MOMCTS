@@ -33,7 +33,7 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
 
     all_F_global = np.vstack(all_F_global)
     z_ideal = [-1.5, 0]
-    z_nadir = [0, 10]
+    z_nadir = [0, 20]
     print(f"\n🌍 Global Ideal: {z_ideal}, Nadir: {z_nadir}")
 
     # Reference point (slightly worse than nadir)
@@ -67,10 +67,10 @@ def calculate_hv_progression(algorithms, batch_size=10, visualize=True, max_samp
                 hv = metric(F_subset)
                 hv_values.append(hv)
 
-            # expected_len = max_samples // batch_size
+            expected_len = max_samples // batch_size
             
-            # if len(hv_values) < expected_len:
-            #     hv_values += [hv_values[-1]] * (expected_len - len(hv_values))
+            if len(hv_values) < expected_len:
+                hv_values += [hv_values[-1]] * (expected_len - len(hv_values))
 
             hv_runs.append(hv_values)
 

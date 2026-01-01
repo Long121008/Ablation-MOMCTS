@@ -10,7 +10,7 @@ from ...base import Function
 from ...tools.profiler import ProfilerBase
 
 
-class EoHProfiler(ProfilerBase):
+class MPaGEProfiler(ProfilerBase):
     _cur_gen = 0
 
     def __init__(self,
