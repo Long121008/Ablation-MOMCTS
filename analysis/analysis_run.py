@@ -1,32 +1,63 @@
-from HV_func_eval import calculate_hv_progression
-from IGD_func_eval import compare_igd_curves_multi
-from utils import calculate_true_pareto_front, read_json
+# analysis/run_analysis.py
+
+from analysis.IGD import plot_igd, build_reference_pf
+from analysis.HV import calculate_hv_progression
 from plot_pareto_front import compare_pareto_from_algorithms
+from utils import read_json
 
 
-def run_analysis(metric="pareto", problem="tsp_semo", working_dir = None):
+def run_analysis(
+    metric,
+    problem,
+    working_dir=None,
+    igd_ylim=None,          # 👈 NEW
+):
+    """
+    Run analysis for a given metric and problem.
 
-    problem_dict = read_json("analysis/analysis_problem_test_size_100.json")
-    algorithms = problem_dict[problem]
+    metric: "igd" | "hv" | "pareto"
+    problem: key in analysis_problem.json
+    working_dir: optional experiment subfolder
+    igd_ylim: tuple (ymin, ymax) or None
+    """
+    config = read_json("analysis/analysis_problem.json")
+    algorithms = config[problem]
 
     if metric == "hv":
-        calculate_hv_progression(algorithms, batch_size=10)
+        calculate_hv_progression(
+            algorithms,
+            batch_size=10,
+            visualize=True,
+            max_samples=300,
+            print_detail=True,
+        )
 
     elif metric == "igd":
-        true_pf_approx = calculate_true_pareto_front([
-            f"logs/momcts/{problem}/{working_dir}",
-            f"logs/meoh/{problem}/{working_dir}",
-            f"logs/nsga2/{problem}/{working_dir}",
-            f"logs/moead/{problem}/{working_dir}"
-        ])
-        compare_igd_curves_multi(algorithms, true_pf_approx, max_eval=300)
+        all_paths = [p for paths in algorithms.values() for p in paths]
+        ref_pf = build_reference_pf(all_paths)
+
+        plot_igd(
+            algorithms,
+            ref_pf,
+            max_eval=300,
+            step=10,
+            ylim=igd_ylim,    # 👈 PASS THROUGH
+        )
 
     elif metric == "pareto":
-        compare_pareto_from_algorithms(algorithms, show_global=True)
+        compare_pareto_from_algorithms(
+            algorithms,
+            show_global=True,
+        )
 
     else:
         raise ValueError(f"Unknown metric: {metric}")
 
 
 if __name__ == "__main__":
-    run_analysis(metric="hv", problem="bi_kp", working_dir="test_100")
+    run_analysis(
+        metric="hv",
+        problem="bi_kp",
+        working_dir="nhv_runtime_20",
+        igd_ylim=(0.0, 15.0)
+    )
