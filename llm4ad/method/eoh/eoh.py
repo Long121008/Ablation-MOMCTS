@@ -23,7 +23,7 @@ class EoH:
                  profiler: ProfilerBase = None,
                  max_generations: Optional[int] = 10,
                  max_sample_nums: Optional[int] = 100,
-                 pop_size: Optional[int] = 5,
+                 pop_size: Optional[int] = 20,
                  selection_num=2,
                  use_e2_operator: bool = True,
                  use_m1_operator: bool = True,
@@ -93,11 +93,7 @@ class EoH:
         # statistics
         self._tot_sample_nums = 0
 
-        # reset _initial_sample_nums_max
-        self._initial_sample_nums_max = min(
-            self._max_sample_nums,
-            2 * self._pop_size
-        )
+    
 
         # multi-thread executor for evaluation
         assert multi_thread_or_process_eval in ['thread', 'process']
@@ -143,13 +139,13 @@ class EoH:
 
     def _sample_evaluate_register(self, prompt, func_only=False, max_retries=3):
         
+        print(f"Inside here")
         for attempt in range(max_retries):
             sample_start = time.time()
             thought, func = self._sampler.get_thought_and_function(
                 prompt
             )
             sample_time = time.time() - sample_start
-            
             
             if func is None:
                 print("New return in _sample_evaluate_register, eoh.py")
@@ -188,12 +184,9 @@ class EoH:
                 
         except Exception as e:
             traceback.print_exc()
-            
-        if func_only:
-            return func
+        
 
         self._population.register_function(func)
-        return True
 
     def _continue_loop(self) -> bool:
         if self._max_generations is None and self._max_sample_nums is None:
@@ -207,15 +200,17 @@ class EoH:
                     and self._tot_sample_nums < self._max_sample_nums)
 
     def _iteratively_use_eoh_operator(self):
-        while self._continue_loop():
+        print("iterative running")
+        while self._continue_sample():
             try:
                 # get a new func using e1
                 indivs = [self._population.selection() for _ in range(self._selection_num)]
                 prompt = EoHPrompt.get_prompt_e1(self._task_description_str, indivs, self._function_to_evolve)
+                print(prompt)
                 if self._debug_mode:
                     print(f'E1 Prompt: {prompt}')
                 self._sample_evaluate_register(prompt)
-                if not self._continue_loop():
+                if not self._continue_sample():
                     break
 
                 # get a new func using e2
@@ -225,7 +220,7 @@ class EoH:
                     if self._debug_mode:
                         print(f'E2 Prompt: {prompt}')
                     self._sample_evaluate_register(prompt)
-                    if not self._continue_loop():
+                    if not self._continue_sample():
                         break
 
                 # get a new func using m1
@@ -235,7 +230,7 @@ class EoH:
                     if self._debug_mode:
                         print(f'M1 Prompt: {prompt}')
                     self._sample_evaluate_register(prompt)
-                    if not self._continue_loop():
+                    if not self._continue_sample():
                         break
 
                 # get a new func using m2
@@ -245,7 +240,7 @@ class EoH:
                     if self._debug_mode:
                         print(f'M2 Prompt: {prompt}')
                     self._sample_evaluate_register(prompt)
-                    if not self._continue_loop():
+                    if not self._continue_sample():
                         break
             except KeyboardInterrupt:
                 break
@@ -293,14 +288,8 @@ class EoH:
             try:
                 # get a new func using i1
                 prompt = EoHPrompt.get_prompt_i1(self._task_description_str, self._function_to_evolve)
-                
                 self._sample_evaluate_register(prompt)
-                if self._tot_sample_nums >= self._initial_sample_nums_max:
-                    # print(f'Warning: Initialization not accomplished in {self._initial_sample_nums_max} samples !!!')
-                    print(
-                        f'Note: During initialization, EoH gets {len(self._population) + len(self._population._next_gen_pop)} algorithms '
-                        f'after {self._initial_sample_nums_max} trails.')
-                    break
+                
             except Exception:
                 if self._debug_mode:
                     traceback.print_exc()
