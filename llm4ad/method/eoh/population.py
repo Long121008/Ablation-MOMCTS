@@ -83,7 +83,6 @@ class Population:
     def selection(self) -> Function:
         funcs = [f for f in self._population if not math.isinf(f.score)]
         
-        # Handle case where no valid functions exist
         if len(funcs) == 0:
             print("⚠️ Warning: No valid functions in population, returning random from all")
             funcs = [f for f in self._population]

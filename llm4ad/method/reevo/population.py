@@ -55,18 +55,13 @@ class Population:
         # in population initialization, we only accept valid functions
         if self._generation == 0 and func.score is None:
             return
-        # if the score is None, we still put it into the population,
-        # we set the score to '-inf'
-        if func.score is None:
-            func.score = float('-inf')
+   
         try:
             self._lock.acquire()
             if self.has_duplicate_function(func):
-                func.score = float('-inf')
-            # register to next_gen
-            self._next_gen_pop.append(func)
-            # update: perform survival if reach the pop size
-            if len(self._next_gen_pop) >= self._pop_size:
+                self._next_gen_pop.append(func)
+
+            if len(self._next_gen_pop) >= self._pop_size or (len(self._next_gen_pop) >= self._pop_size//5 and self._generation == 0):
                 self.survival()
         except Exception as e:
             return
@@ -84,8 +79,16 @@ class Population:
 
     def selection(self) -> Function:
         funcs = [f for f in self._population if not math.isinf(f.score)]
+        
+        if len(funcs) == 0:
+            print("⚠️ Warning: No valid functions in population, returning random from all")
+            funcs = [f for f in self._population]
+            if len(funcs) == 0:
+                return None
+            return funcs[0]
+        
         func = sorted(funcs, key=lambda f: f.score)
-        p = [1 / (r + len(func)) for r in range(len(func))]
+        p = [1 / (r + 1 + len(func)) for r in range(len(func))]  # Avoid division by zero
         p = np.array(p)
         p = p / np.sum(p)
         return np.random.choice(func, p=p)
