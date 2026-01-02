@@ -141,20 +141,20 @@ class EoH:
                 print(f'Warning: population size {self._pop_size} '
                       f'is not suitable, please reset it to 5.')
 
-    def _sample_evaluate_register(self, prompt, op: str, func_only=False, max_retries=3):
+    def _sample_evaluate_register(self, prompt, func_only=False, max_retries=3):
+        
         for attempt in range(max_retries):
             sample_start = time.time()
             thought, func = self._sampler.get_thought_and_function(
-                self._task_description_str, prompt
+                prompt
             )
             sample_time = time.time() - sample_start
-
+            
+            
             if func is None:
                 print("New return in _sample_evaluate_register, eoh.py")
                 return False
-            
-            print(f"Func is: {func}")
-            
+                        
             program = TextFunctionProgramConverter.function_to_program(
                 func, self._template_program
             )
@@ -179,16 +179,18 @@ class EoH:
         func.sample_time = sample_time
         print(f"✅ Success getting func information")
 
-        if self._profiler is not None:
-            print(f"gonna register!")
-            self._profiler.register_function(prompt, func, program=str(program), op=op)
-            self._tot_sample_nums += 1
-
+        try:
+            if self._profiler is not None:
+                self._profiler.register_function(prompt, func, program=str(program))
+                if isinstance(self._profiler, EoHProfiler):
+                    self._profiler.register_population(self._population)
+                self._tot_sample_nums += 1
+                
+        except Exception as e:
+            traceback.print_exc()
+            
         if func_only:
             return func
-
-        if func.score is None:
-            return False
 
         self._population.register_function(func)
         return True
@@ -257,15 +259,41 @@ class EoH:
             self._evaluation_executor.shutdown(cancel_futures=True)
         except:
             pass
-
+    
+    def _continue_sample(self):
+        """Check if it meets the max_sample_nums restrictions.
+        """
+        if self._max_generations is None and self._max_sample_nums is None:
+            return True
+        if self._max_generations is None and self._max_sample_nums is not None:
+            if self._tot_sample_nums < self._max_sample_nums:
+                return True
+            else:
+                return False
+        if self._max_generations is not None and self._max_sample_nums is None:
+            if self._population.generation < self._max_generations:
+                return True
+            else:
+                return False
+        if self._max_generations is not None and self._max_sample_nums is not None:
+            continue_until_reach_gen = False
+            continue_until_reach_sample = False
+            if self._population.generation < self._max_generations:
+                continue_until_reach_gen = True
+            if self._tot_sample_nums < self._max_sample_nums:
+                continue_until_reach_sample = True
+            return continue_until_reach_gen and continue_until_reach_sample
+        
     def _iteratively_init_population(self):
        
-        while self._population.generation == 0:
+        while len(self._population) < self._pop_size:
+            if not self._continue_sample():
+                print("HIHI")
+                break
             try:
                 # get a new func using i1
                 prompt = EoHPrompt.get_prompt_i1(self._task_description_str, self._function_to_evolve)
                 
-                print(f"Check init prompt: {prompt}")
                 self._sample_evaluate_register(prompt)
                 if self._tot_sample_nums >= self._initial_sample_nums_max:
                     # print(f'Warning: Initialization not accomplished in {self._initial_sample_nums_max} samples !!!')
@@ -308,6 +336,7 @@ class EoH:
                 return
 
         # evolutionary search
+        print("Finish initialization")
         self._multi_threaded_sampling(self._iteratively_use_eoh_operator)
 
         # finish

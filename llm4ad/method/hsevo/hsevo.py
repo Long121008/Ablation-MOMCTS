@@ -235,18 +235,7 @@ class HSEvo:
         print(f"Population size: {len(self._population)}")
 
     def _sample_evaluate_register(self, prompt: str, operation_type: str = "unknown", scientist_persona: str = "", accumulative: bool = False) -> Function:
-        """Sample, evaluate and register a function.
-        
-        Args:
-            prompt: Prompt for LLM
-            operation_type: Type of operation for logging
-            scientist_persona: Scientist persona for system prompt
-            accumulative: If True, add to population without trimming (for generation operations)
-            
-        Returns:
-            Generated function or None if failed
-        """
-        # Debug prompts if in debug mode
+        print(f"Check prompt:\n{prompt}")
         if self._debug_mode:
             print(f"\n=== HSEvo {operation_type.upper()} PROMPTS ===")
             system_prompt = self._sampler._prompt_generator.get_system_generator_prompt(scientist_persona)

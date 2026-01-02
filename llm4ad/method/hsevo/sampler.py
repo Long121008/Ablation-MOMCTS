@@ -112,7 +112,6 @@ class HSEvoSampler:
         # Create message with proper system prompt
         system_prompt = self._prompt_generator.get_system_generator_prompt(scientist_persona)
         messages = self._prompt_generator.create_instruct_prompt(prompt, system_prompt)
-        
         logging.debug(f"HSEvoSampler: Sending request to LLM with {len(messages)} messages")
         response = self._llm.draw_sample(messages)
         logging.debug(f"HSEvoSampler: Received LLM response of length {len(response)}")

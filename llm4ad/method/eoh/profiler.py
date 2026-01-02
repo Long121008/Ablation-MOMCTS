@@ -14,119 +14,123 @@ from ...tools.profiler import ProfilerBase
 class EoHProfiler(ProfilerBase):
 
     def __init__(self,
-                 log_dir: Optional[str] = None,
-                 num_objs=1,
-                 result_folder=None,
+                 log_dir: str | None = None,
+                 num_objs=2,
+                 result_folder = None, 
                  *,
                  initial_num_samples=0,
                  log_style='complex',
-                 create_random_path=True,
                  **kwargs):
         super().__init__(log_dir=log_dir,
-                         num_objs=num_objs,
-                         result_folder=result_folder,
                          initial_num_samples=initial_num_samples,
                          log_style=log_style,
-                         create_random_path=create_random_path,
+                         num_objs=num_objs,
+                         result_folder=result_folder,
                          **kwargs)
-
         self._cur_gen = 0
         self._pop_lock = Lock()
-
         if self._log_dir:
             self._ckpt_dir = os.path.join(self._log_dir, 'population')
+            self._elitist_dir = os.path.join(self._log_dir, 'elitist')
             os.makedirs(self._ckpt_dir, exist_ok=True)
+            os.makedirs(self._elitist_dir, exist_ok=True)
 
-    # ------------------------------------------------------------------
-    # Population checkpointing (aligned with MOMCTSProfiler)
-    # ------------------------------------------------------------------
     def register_population(self, pop: Population):
         try:
             self._pop_lock.acquire()
-
-            if self._num_samples == 0 or pop.generation == self._cur_gen:
+            if (self._num_samples == 0 or
+                    pop.generation == self._cur_gen):
                 return
-
-            funcs_json = []
-            for f in pop.population:  # type: List[Function]
+            funcs = pop.population  # type: List[Function]
+            funcs_json = []  # type: List[Dict]
+            for f in funcs:
                 f_score = f.score
-                if f_score is not None:
-                    if np.isinf(np.array(f_score)).any():
+                if f.score is not None:
+                    if np.isinf(np.array(f.score)).any():
                         f_score = None
-
-                funcs_json.append({
+                    else:
+                        f_score = f_score
+                f_json = {
                     'algorithm': f.algorithm,
                     'function': str(f),
                     'score': f_score
-                })
-
+                }
+                funcs_json.append(f_json)
             path = os.path.join(self._ckpt_dir, f'pop_{pop.generation}.json')
-            with open(path, 'w') as f:
-                json.dump(funcs_json, f, indent=4)
+            with open(path, 'w') as json_file:
+                json.dump(funcs_json, json_file, indent=4)
 
+            # Saving the elitist
+            funcs = pop.elitist
+            for f in funcs:
+                f_score = f.score
+                if f.score is not None:
+                    if np.isinf(np.array(f.score)).any():
+                        f_score = None
+                    else:
+                        f_score = f_score
+                f_json = {
+                    'algorithm': f.algorithm,
+                    'function': str(f),
+                    'score': f_score
+                }
+                funcs_json.append(f_json)
+            path = os.path.join(self._elitist_dir, f'elitist_{pop.generation}.json')
+            with open(path, 'w') as json_file:
+                json.dump(funcs_json, json_file, indent=4)
             self._cur_gen += 1
-
         finally:
             if self._pop_lock.locked():
                 self._pop_lock.release()
 
-    # ------------------------------------------------------------------
-    # JSON logging (history / best)
-    # ------------------------------------------------------------------
-    def _write_json(self,
-                    prompt: str,
-                    function: Function,
-                    program='',
-                    *,
-                    record_type='history',
-                    record_sep=300,
-                    **kwargs):
+    def _write_json(self, prompt: str, function: Function, program='', *, record_type='history', record_sep=300):
+        """
+            Write function data to a JSON file.
+
+            Parameters:
+                function (Function): The function object containing score and string representation.
+                record_type (str, optional): Type of record, 'history' or 'best'. Defaults to 'history'.
+                record_sep (int, optional): Separator for history records. Defaults to 200.
+        """
         assert record_type in ['history', 'best']
 
         if not self._log_dir:
             return
 
         sample_order = self._num_samples
-
-        def convert(obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            elif isinstance(obj, np.generic):
-                return obj.item()
-            elif isinstance(obj, list):
-                return [convert(x) for x in obj]
-            elif isinstance(obj, dict):
-                return {k: convert(v) for k, v in obj.items()}
-            return obj
-
+        func_score = function.score
+        if function.score is not None:
+            if np.isinf(np.array(function.score)).any():
+                func_score = None
+            else:
+                if isinstance(function.score, np.ndarray):
+                    func_score = func_score.tolist()
+                elif isinstance(function.score, tuple):
+                    func_score = list(function.score)
         content = {
             'prompt': prompt,
             'sample_order': sample_order,
-            'algorithm': function.algorithm,
+            'algorithm': function.algorithm,  # Added when recording
             'function': str(function),
-            'score': convert(function.score),
+            'score': func_score,
             'program': program,
         }
 
-        if 'op' in kwargs:
-            content['operation'] = kwargs['op']
-
         if record_type == 'history':
-            lower = ((sample_order - 1) // record_sep) * record_sep
-            upper = lower + record_sep
-            filename = f'samples_{lower + 1}~{upper}.json'
+            lower_bound = ((sample_order - 1) // record_sep) * record_sep
+            upper_bound = lower_bound + record_sep
+            filename = f'samples_{lower_bound + 1}~{upper_bound}.json'
         else:
             filename = 'samples_best.json'
 
         path = os.path.join(self._samples_json_dir, filename)
 
         try:
-            with open(path, 'r') as f:
-                data = json.load(f)
+            with open(path, 'r') as json_file:
+                data = json.load(json_file)
         except (FileNotFoundError, json.JSONDecodeError):
             data = []
 
         data.append(content)
-
-        with open(path, 'w') as f:
-            json.dump(data, f, indent=4)
+        with open(path, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
