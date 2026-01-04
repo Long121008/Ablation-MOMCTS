@@ -117,12 +117,11 @@ class MOMCTS_AHD:
         # pass parameters to profiler
         if profiler is not None:
             self._profiler.record_parameters(
-                llm, evaluation, self)  # ZL: necessary
+                llm, evaluation, self)  
 
-        # Flash Reflection variables for long-term
-        self.good_reflections = []  # Store phase 2 outputs where new heuristic is discovered (better score)
-        self.bad_reflections = []   # Store phase 2 outputs where no improvement
-        self.long_term_hints = ""   # Aggregate good reflections for long-term influence on code generation
+        self.good_reflections = []  
+        self.bad_reflections = []  
+        self.long_term_hints = ""   
 
 
     def _sample_evaluate_register(self, prompt, op: str, func_only=False, max_retries=3):
@@ -158,10 +157,8 @@ class MOMCTS_AHD:
         func.evaluate_time = eval_time
         func.algorithm = thought
         func.sample_time = sample_time
-        print(f"✅ Success getting func information")
 
         if self._profiler is not None:
-            print(f"gonna register!")
             self._profiler.register_function(prompt, func, program=str(program), op=op)
             self._tot_sample_nums += 1
 
@@ -178,7 +175,6 @@ class MOMCTS_AHD:
         if self._max_sample_nums is None:
             return True
         else:
-            # if the current evaluation func number < max number, still do this
             return self._tot_sample_nums < self._max_sample_nums
 
     def check_duplicate(self, population, code: str):
@@ -193,22 +189,38 @@ class MOMCTS_AHD:
                 return True
         return False
 
-    # add tree path for reasoning s1
-    def population_management_s1(self, pop_input: list[Function], size=None):
-        """
-        Args:
-            pop_input: list of individuals (each with .score attribute)
-            size: optional, desired population size (ignored if larger than nondominated set)
+    def batch_reflection(self, node_set: list[MCTSNode], reference_pop, current_reflection: str):
+        if not node_set:
+            return
 
-        Returns:
-            pop_new: list of non-dominated individuals only
-        """
-        # Filter valid individuals
+        candidates = [n.individual for n in node_set if n.individual.score is not None]
+        if not candidates:
+            return
+
+        ref_scores = [ind.score for ind in reference_pop]
+
+        have_dominated = 1
+        
+        for ind in candidates:
+            dominated = any(dominates(r, ind.score) for r in ref_scores)
+            if not dominated:
+                have_dominated = 0
+                self.good_reflections.append(current_reflection)
+                break
+        
+        if have_dominated:
+            self.bad_reflections.append(current_reflection)
+
+        self.good_reflections = self.good_reflections[-20:]
+        self.bad_reflections = self.bad_reflections[-20:]
+
+
+    def population_management_s1(self, pop_input: list[Function], size=None):
+        
         pop = [ind for ind in pop_input if ind.score is not None]
         if not pop:
             return []
 
-        # Deduplicate by score
         unique_pop, seen_scores = [], set()
         for ind in pop:
             key = tuple(ind.score)
@@ -219,18 +231,14 @@ class MOMCTS_AHD:
         if not unique_pop:
             return []
 
-        # Score matrix
         scores = np.array([ind.score for ind in unique_pop])
 
-        # Perform non-dominated sorting
         nds = NonDominatedSorting()
         fronts = nds.do(scores)
 
-        # Keep only the first front (nondominated solutions)
         nondominated_indices = fronts[0]
         nondominated = [unique_pop[i] for i in nondominated_indices]
 
-        # Optionally truncate if 'size' is smaller than number of nondominated
         if size is not None and len(nondominated) > size:
             nondominated = nondominated[:size]
 
@@ -238,7 +246,7 @@ class MOMCTS_AHD:
         return nondominated
 
 
-    def expand(self, mcts: MCTS, node_set: list[MCTSNode], cur_node: MCTSNode, option: str):
+    def expand(self, mcts: MCTS, node_set: list[MCTSNode], cur_node: MCTSNode, option: str, reflection = None):
         print(f"Current node depth: {cur_node.depth}")  
         
         is_valid_func = True
@@ -248,19 +256,20 @@ class MOMCTS_AHD:
             while now.algorithm != "Root":
                 path_set.append(now.individual)
                 now = copy.deepcopy(now.parent)
-            # path_set = self.population_management_s1(path_set)
+
             if len(path_set) == 1:
                 return node_set
 
             i = 0
             while i < 3:
-                if self.review and self.long_term_hints is not None:
+                if self.review and reflection is not None:
                     prompt = MOMCTSPrompt.get_prompt_s1(
-                    self._task_description_str, path_set, self._function_to_evolve, self.long_term_hints)
+                    self._task_description_str, path_set, self._function_to_evolve, reflection)
                 else:
                     prompt = MOMCTSPrompt.get_prompt_s1(
                         self._task_description_str, path_set, self._function_to_evolve)
                 func = self._sample_evaluate_register(prompt, option, func_only=True)
+                
                 if func is False:
                     is_valid_func = False
                     i += 1
@@ -276,7 +285,6 @@ class MOMCTS_AHD:
         elif option == 'e1':
             indivs = [copy.deepcopy(children.subtree[random.choices(range(len(children.subtree)), k=1)[0]].individual)
                       for
-                      # so mcts.root.children becauses we only use e1 in initialization
                       children in mcts.root.children]
             
             prompt = MOMCTSPrompt.get_prompt_e1(
@@ -299,14 +307,15 @@ class MOMCTS_AHD:
                 
                 indivs = [now_indiv, cur_node.individual] 
                 
-                if self.review and self.long_term_hints is not None:
+                if self.review and reflection is not None:
                     prompt = MOMCTSPrompt.get_prompt_e2(
-                                            self._task_description_str, indivs, self._function_to_evolve, self.long_term_hints)
+                                            self._task_description_str, indivs, self._function_to_evolve, reflection)
                 else:
                     prompt = MOMCTSPrompt.get_prompt_e2(
                     self._task_description_str, indivs, self._function_to_evolve)
                     
                 func = self._sample_evaluate_register(prompt, option, func_only=True)
+
                 if func is False:
                     is_valid_func = False
                     i += 1
@@ -323,9 +332,14 @@ class MOMCTS_AHD:
         elif option == 'm1':
             i = 0
             while i < 3:
-                prompt = MOMCTSPrompt.get_prompt_m1(self._task_description_str, cur_node.individual,
+                if self.review and reflection is not None:
+                     prompt = MOMCTSPrompt.get_prompt_m1(self._task_description_str, cur_node.individual,
+                                                self._function_to_evolve, reflection)
+                else:
+                    prompt = MOMCTSPrompt.get_prompt_m1(self._task_description_str, cur_node.individual,
                                                 self._function_to_evolve)
                 func = self._sample_evaluate_register(prompt, option, func_only=True)
+                
                 if func is False:
                     is_valid_func = False
                     i += 1
@@ -340,9 +354,14 @@ class MOMCTS_AHD:
         elif option == 'm2':
             i = 0
             while i < 3:
-                prompt = MOMCTSPrompt.get_prompt_m2(self._task_description_str, cur_node.individual,
+                if self.review and reflection is not None:
+                    prompt = MOMCTSPrompt.get_prompt_m2(self._task_description_str, cur_node.individual,
+                                                self._function_to_evolve, reflection)
+                else:
+                    prompt = MOMCTSPrompt.get_prompt_m2(self._task_description_str, cur_node.individual,
                                                 self._function_to_evolve)
                 func = self._sample_evaluate_register(prompt, option, func_only=True)
+                    
                 if func is False:
                     is_valid_func = False
                     i += 1
@@ -353,79 +372,7 @@ class MOMCTS_AHD:
                     continue
                 else:
                     break
-                
-        elif option == 'elitist':
-            i = 0
-            while i < 3:  # Retries giới hạn để flash
-                elites = self.population_management_s1(self._population.population) # survival is enough 
-                if len(elites) < 2:
-                    print("Not enough elites for elitist action.")
-                    return node_set
 
-                # Phase 1: Analyze elites để get flash reflection insights (như Prompt 5)
-                prompt_phase1 = MOMCTSPrompt.get_flash_reflection_phase1_prompt(
-                    self._task_description_str, elites, self._function_to_evolve
-                )
-                insights = self._sampler.get_thought(prompt_phase1)  # Chỉ get thought (nhanh), guide từ phase 1
-
-                if not insights:
-                    i += 1
-                    continue
-
-                # Adjust long-term reflection using guide from phase 1
-                good_str = "\n".join(self.good_reflections[-5:]) if self.good_reflections else ""  # Limit to keep flash
-                bad_str = "\n".join(self.bad_reflections[-5:]) if self.bad_reflections else ""
-                prompt_phase2 = MOMCTSPrompt.get_flash_reflection_phase2_prompt(
-                    self._task_description_str, insights, good_str, bad_str
-                )
-                long_term_guide = self._sampler.get_thought(prompt_phase2)  # Redefine to create adjusted long-term guide
-
-                if not long_term_guide:
-                    i += 1
-                    continue
-
-                # Use the adjusted long-term guide to generate code
-                prompt_generate = MOMCTSPrompt.get_flash_generate_code_prompt(
-                    self._task_description_str, elites, self._function_to_evolve, long_term_guide
-                )
-                func = self._sample_evaluate_register(prompt_generate, option, func_only=True)
-                if func is False:
-                    is_valid_func = False
-                    i += 1
-                    continue
-                is_valid_func = (func.score is not None) and not self.check_duplicate(
-                    node_set, str(func))
-                if is_valid_func is False:
-                    i += 1
-                    continue
-                else:
-                    is_dominated = any(dominates(elite.score, func.score) for elite in elites)            
-                    if not is_dominated: 
-                        self.good_reflections.append(long_term_guide)
-                    else:
-                        self.bad_reflections.append(long_term_guide)
-
-                    self.long_term_hints = long_term_guide  # Accumulate recent good ones
-                    break
-
-            if not is_valid_func:
-                print(f"Timeout in elitist action with flash reflection.")
-                return node_set
-
-            print(f"Action: {option}, Elites Obj: {[e.score for e in elites]}, New Obj: {func.score}, Depth: {cur_node.depth + 1}")
-
-            if is_valid_func and np.any(func.score != float('-inf')):
-                self._population.register_function(func)
-                print(f"Passed score into MCTSNode in expand: {func.score}")
-                # func.score here [NHV, runtime]
-                now_node = MCTSNode(func.algorithm, str(func), func.score, individual=func,
-                                    parent=cur_node, depth=cur_node.depth + 1, visit=0, raw_info=func)
-                if option == 'e1':
-                    now_node.subtree.append(now_node)
-                cur_node.add_child(now_node)
-                mcts.backpropagate(now_node, now_node.reward_vector)
-                node_set.append(now_node)
-            return node_set
 
         else:
             assert False, 'Invalid option!'
@@ -490,19 +437,18 @@ class MOMCTS_AHD:
     
     def _multi_threaded_sampling(self, fn: callable, tasks=None, *args, **kwargs):
         sampler_threads = []
-        lock = Lock()  # create a lock for thread safety
+        lock = Lock()  
 
         def safe_wrapper(*a, **k):
-            # critical section guarded by lock
             with lock:
                 fn(*a, **k)
 
-        if tasks is None:  # mode 1: same task for all threads
+        if tasks is None: 
             sampler_threads = [
                 Thread(target=safe_wrapper, args=args, kwargs=kwargs)
                 for _ in range(self._num_samplers)
             ]
-        else:  # mode 2: each task has its own args/kwargs
+        else:  
             for task in tasks:
                 if isinstance(task, tuple):
                     task_args, task_kwargs = task if len(task) == 2 else (task, {})
@@ -536,17 +482,9 @@ class MOMCTS_AHD:
             self.mcts.backpropagate(now_node, now_node.reward_vector)
             now_node.subtree.append(now_node)
           
-        if len(self._population) < self._selection_num:
-            print(
-                f'The search is terminated since MCTS_AHD unable to obtain {self._selection_num} feasible algorithms during initialization. '
-                f'Please increase the `initial_sample_nums_max` argument (currently {self._initial_sample_nums_max}). '
-                f'Please also check your evaluation implementation and LLM implementation.')
-            return
-
-        # evolutionary search
-        n_op = ['e1', 'e2', 'm1', 'm2', 's1', 'elitist']  # Thêm 'elitist'
-        op_weights = [0, 2, 1, 1, 1, 1]  # Weight cao hơn cho elitist để ưu tiên develop elites
-        while self._continue_loop():  # if current evaluation < max evaluation, still evaluate function
+        n_op = ['e1', 'e2', 'm1', 'm2', 's1']  
+        op_weights = [0, 2, 1, 1, 1, 1] 
+        while self._continue_loop(): 
             node_set = []
             print(
                 f"Current number of MCTS nodes in the subtree of each child of the root: {[len(node.subtree) for node in self.mcts.root.children]}")
@@ -561,17 +499,35 @@ class MOMCTS_AHD:
                 if int((cur_node.visits) ** self.mcts.alpha) > len(cur_node.children):
                     if cur_node == self.mcts.root:
                         op = 'e1'
-                        print("Perfrom e1 operation")
                         self.expand(
                             self.mcts, self.mcts.root.children, cur_node, op)
                     else:
                         op = 'e2'
-                        print("Perfrom 'e2' operation")
                         self.expand(self.mcts, cur_node.children, cur_node, op)
 
                 cur_node = next_node
             
+            if self.review:
+                elites = self.population_management_s1(self._population.population) 
+                
+                if len(elites) < 2:
+                    print("Not enough elites for elitist action.")
+                
+                prompt_phase1 = MOMCTSPrompt.get_flash_reflection_phase1_prompt(
+                    self._task_description_str, elites, self._function_to_evolve
+                )
+                insights = self._sampler.get_thought(prompt_phase1)
 
+                good_str = "\n".join(self.good_reflections[-5:]) if self.good_reflections else "" 
+                bad_str = "\n".join(self.bad_reflections[-5:]) if self.bad_reflections else ""
+                
+                prompt_phase2 = MOMCTSPrompt.get_flash_reflection_phase2_prompt(
+                    self._task_description_str, insights, good_str, bad_str
+                )
+
+                old_population = list(self._population.population)
+            else:
+                prompt_phase2 = None
             tasks = []
             for i in range(len(n_op)):
                 op = n_op[i]  # get operation
@@ -582,12 +538,15 @@ class MOMCTS_AHD:
                 op_w = op_weights[i]
                 
                 for j in range(op_w):
-                    tasks.append((self.mcts, node_set, cur_node, op))
+                    tasks.append((self.mcts, node_set, cur_node, op, prompt_phase2))
+            
+            print(f"Check node set after operators: {node_set}")
                 
             self._multi_threaded_sampling(self.expand, tasks)
-            print(f"Multi sampling successful!")
-            self._population.survival() 
             
+            if self.review:
+                self.batch_reflection(node_set, old_population, prompt_phase2)
+
             if isinstance(self._profiler, MOMCTSProfiler):
                 self._profiler.register_population(self._population)
            

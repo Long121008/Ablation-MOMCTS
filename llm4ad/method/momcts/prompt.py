@@ -108,7 +108,7 @@ Check syntax, code carefully before returning the final function. Do not give ad
 
     
     @classmethod
-    def get_prompt_m1(cls, task_prompt: str, indi: Function, template_function: Function):
+    def get_prompt_m1(cls, task_prompt: str, indi: Function, template_function: Function, suggestions = None):
         assert hasattr(indi, 'algorithm')
        
         temp_func = copy.deepcopy(template_function)
@@ -118,6 +118,10 @@ Check syntax, code carefully before returning the final function. Do not give ad
         {indi.algorithm}
         Code:
         {str(indi)}
+        
+        Additionally, here is a long-term reflection that provides higher-level guidance for improvement:
+        {suggestions}
+            
         Please create a new algorithm that has a different form but can be a modified version of the provided algorithm. Attempt to introduce more novel mechanisms and new equations or programme segments.
         1. First, describe your new algorithm and main steps in one sentence. The description must be inside within boxed {{}}.
         2. Next, implement the idea in the following Python function:
@@ -126,7 +130,7 @@ Check syntax, code carefully before returning the final function. Do not give ad
         return prompt_content
     
     @classmethod
-    def get_prompt_m2(cls, task_prompt: str, indi: Function, template_function: Function):
+    def get_prompt_m2(cls, task_prompt: str, indi: Function, template_function: Function, suggestions = None):
         assert hasattr(indi, 'algorithm')
 
         temp_func = copy.deepcopy(template_function)
@@ -135,6 +139,10 @@ Check syntax, code carefully before returning the final function. Do not give ad
         {indi.algorithm}
         Code:
         {str(indi)}
+        
+        Additionally, here is a long-term reflection that provides higher-level guidance for improvement:
+        {suggestions}
+        
         Please identify the main algorithm parameters and help me in creating a new algorithm that has different parameter settings to equations compared to the provided algorithm.
         1. First, describe your new algorithm and main steps in one sentence. The description must be inside within boxed {{}}.
         2. Next, implement the idea in the following Python function:
@@ -228,24 +236,4 @@ Check syntax, code carefully before returning the final function. Do not give ad
         I’m going to tip $999K for a better heuristics! Let’s think step by step.'''
         return prompt_content
 
-    @classmethod
-    def get_flash_generate_code_prompt(cls, task_prompt: str, indivs: List[Function], template_function: Function, long_term_guide: str):
-        temp_func = copy.deepcopy(template_function)
-        indivs_prompt = ''
-        for i, indi in enumerate(indivs):
-            indi.docstring = ''
-            indivs_prompt += (
-                f"No. {i + 1} algorithm's description and the corresponding code are:\n"
-                f"{indi.algorithm}\n{str(indi)}\n"
-            )
-            
-        prompt_content = f'''{task_prompt}
-        I have {len(indivs)} existing algorithms with their codes as follows:
-        {indivs_prompt}
-        Adjusted long-term guide: {long_term_guide}
-        Please create a new algorithm inspired by above with better objectives, using the long-term guide.
-        1. Describe new algorithm in one sentence. Boxed {{}}.
-        2. Implement:
-        {str(temp_func)}
-        Check syntax. No extra explanations.'''
-        return prompt_content
+   
