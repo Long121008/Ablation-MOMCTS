@@ -93,8 +93,7 @@ class HSEvoProfiler(ProfilerBase):
         if self._log_dir:
             self._write_harmony_search_log(log_entry)
     
-    def log_reflection(self, reflection_type: str, content: str, successful: bool = True):
-        """Log reflection content.
+           """Log reflection content.
         
         Args:
             reflection_type: Type of reflection ('flash' or 'comprehensive')

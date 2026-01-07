@@ -234,59 +234,60 @@ class HSEvo:
         print(f"Restored {restored_samples} samples, {self._generation} generations")
         print(f"Population size: {len(self._population)}")
 
-    def _sample_evaluate_register(self, prompt: str, operation_type: str = "unknown", scientist_persona: str = "", accumulative: bool = False) -> Function:
-        print(f"Check prompt:\n{prompt}")
-        if self._debug_mode:
-            print(f"\n=== HSEvo {operation_type.upper()} PROMPTS ===")
-            system_prompt = self._sampler._prompt_generator.get_system_generator_prompt(scientist_persona)
-            print(f"System: {system_prompt}")
-            print(f"User: {prompt}")
-            print("=== END PROMPTS ===\n")
-        
-        # Step 1: Sampling
-        sample_start = time.time()
-        raw_response = None
-        try:
-            # Try new method that returns raw response for debugging
-            if hasattr(self._sampler, 'get_thought_and_function_with_response'):
-                thought, func, raw_response = self._sampler.get_thought_and_function_with_response(prompt, scientist_persona)
-            else:
-                # Fallback to original method
-                thought, func = self._sampler.get_thought_and_function(prompt, scientist_persona)
-            sample_time = time.time() - sample_start
-        except Exception as e:
-            print(f"❌ {operation_type}: Sampling failed - {e}")
-            if self._debug_mode:
-                traceback.print_exc()
-            return None
-        
-        # Step 2: Validation
-        if func is None:
-            print(f"❌ {operation_type}: No function extracted")
-            if raw_response is not None:
-                print(f"   Raw LLM response ({len(raw_response)} chars):")
-                print(f"   {'-'*50}")
-                print(f"   {raw_response}")
-                print(f"   {'-'*50}")
-            return None
-        
-        # Step 3: Program conversion and evaluation
-        try:
-            program = TextFunctionProgramConverter.function_to_program(func, self._template_program)
-            if program is None:
-                print(f"❌ {operation_type}: Function to program conversion failed")
+    def _sample_evaluate_register(self, prompt: str, operation_type: str = "unknown", scientist_persona: str = "", accumulative: bool = False, max_retries = 3) -> Function:
+       
+        for attempt in range(max_retries):
+            sample_start = time.time()
+            raw_response = None
+            try:
+                # Try new method that returns raw response for debugging
+                if hasattr(self._sampler, 'get_thought_and_function_with_response'):
+                    thought, func, raw_response = self._sampler.get_thought_and_function_with_response(prompt, scientist_persona)
+                else:
+                    # Fallback to original method
+                    thought, func = self._sampler.get_thought_and_function(prompt, scientist_persona)
+                sample_time = time.time() - sample_start
+            except Exception as e:
+                print(f"❌ {operation_type}: Sampling failed - {e}")
+                if self._debug_mode:
+                    traceback.print_exc()
                 return None
             
-            eval_future = self._evaluation_executor.submit(
-                self._evaluator.evaluate_program_record_time,
-                program
-            )
-            score, eval_time = eval_future.result()
-        except Exception as e:
-            print(f"❌ {operation_type}: Evaluation failed - {e}")
-            if self._debug_mode:
-                traceback.print_exc()
-            return None
+            # Step 2: Validation
+            if func is None:
+                print(f"❌ {operation_type}: No function extracted")
+                if raw_response is not None:
+                    print(f"   Raw LLM response ({len(raw_response)} chars):")
+                    print(f"   {'-'*50}")
+                    print(f"   {raw_response}")
+                    print(f"   {'-'*50}")
+                return None
+            
+            # Step 3: Program conversion and evaluation
+            try:
+                program = TextFunctionProgramConverter.function_to_program(func, self._template_program)
+                if program is None:
+                    print(f"❌ {operation_type}: Function to program conversion failed")
+                    return None
+                
+                score, eval_time = self._evaluation_executor.submit(
+                    self._evaluator.evaluate_program_record_time,
+                    program
+                ).result()
+                                
+                if score is not None:
+                    break   
+                else:
+                    print(f"⚠️ Score is None (attempt {attempt+1}/{max_retries}), retrying...")
+            except Exception as e:
+                print(f"❌ {operation_type}: Evaluation failed - {e}")
+                if self._debug_mode:
+                    traceback.print_exc()
+                return None
+        
+        if score is None:
+            print("❌ Failed to get a valid score after retries.")
+            return False
         
         # Step 4: Set attributes and register
         func.score = score
