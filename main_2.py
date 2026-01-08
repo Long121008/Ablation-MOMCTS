@@ -114,17 +114,21 @@ if __name__ == '__main__':
         print("Error: No API Keys found!")
         sys.exit(1)
 
-    final_keys_to_use = []
+    # Biến này sẽ chứa 1 chuỗi String duy nhất (key được chọn)
+    selected_api_key_string = ""
+
     if args.key_index >= 0:
         if args.key_index < len(full_key_list):
-            final_keys_to_use = [full_key_list[args.key_index]]
-            print(f"-> Selected Key Index {args.key_index}***")
+            selected_api_key_string = full_key_list[args.key_index]
+            print(f"-> Selected Key Index {args.key_index}: {selected_api_key_string[:5]}...***")
         else:
             print(f"Error: Key index out of range.")
             sys.exit(1)
     else:
-        final_keys_to_use = full_key_list
-        print(f"-> Using all {len(final_keys_to_use)} keys.")
+        # Nếu chọn -1 (tất cả), ta lấy cái đầu tiên để tránh lỗi Pydantic
+        # Vì library này có vẻ không hỗ trợ list key rotation
+        print("-> Using the FIRST key found (List input caused validation error).")
+        selected_api_key_string = full_key_list[0]
 
     # 2. XÁC ĐỊNH BÀI TOÁN
     problems_to_run = []
@@ -145,17 +149,16 @@ if __name__ == '__main__':
         print(f"STARTING TASK {i+1}/{len(problems_to_run)}: {p_name}")
         print("="*50)
         
-        # --- FIX LỖI NAME ERROR: Khởi tạo biến trước ---
         method = None
         llm = None
-        # -----------------------------------------------
 
         log_dir = f'logs/{ALGORITHM_NAME}/{p_name}'
         exact_log_dir_name = f"nhv_runtime_reflection/{VERSION}"
 
         try:
+            # FIX LỖI: Truyền thẳng String vào api_key, không dùng list
             llm = MistralApi(
-                keys=final_keys_to_use,
+                keys=selected_api_key_string, # Truyền String!
                 model='codestral-latest',
                 timeout=60
             )
@@ -184,11 +187,12 @@ if __name__ == '__main__':
             print(f">>> FINISHED TASK: {p_name}")
 
         except Exception as e:
+            # In đầy đủ traceback để dễ debug nếu còn lỗi
+            import traceback
+            traceback.print_exc()
             print(f"!!! CRITICAL ERROR in task {p_name}: {e}")
-            # Nếu muốn lỗi bài nào bỏ qua bài đó để chạy tiếp bài sau thì uncomment dòng dưới:
             # continue 
         
-        # --- FIX LỖI NAME ERROR: Kiểm tra trước khi xóa ---
         if method is not None:
             del method
         if llm is not None:
