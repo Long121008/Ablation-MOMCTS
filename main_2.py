@@ -1,10 +1,10 @@
 import argparse
 import os
 import sys
-import gc  # Garbage Collector để dọn RAM
+import gc
 from dotenv import load_dotenv
 
-# --- Import các module đánh giá ---
+# --- Import các module đánh giá (GIỮ NGUYÊN) ---
 from llm4ad.task.optimization.bi_tsp_semo import BITSPEvaluation
 from llm4ad.task.optimization.bi_kp import BIKPEvaluation
 from llm4ad.task.optimization.bi_kp_gls import BIKPGLSEvaluation
@@ -20,7 +20,7 @@ from llm4ad.task.optimization.bi_tsp_gls import TSPGLSEvaluation
 
 from llm4ad.tools.llm.llm_api_codestral import MistralApi
 
-# --- Import các phương pháp ---
+# --- Import các phương pháp (GIỮ NGUYÊN) ---
 from llm4ad.method.momcts import MOMCTS_AHD, MOMCTSProfiler
 from llm4ad.method.meoh import MEoH, MEoHProfiler
 from llm4ad.method.eoh import EoH, EoHProfiler
@@ -31,7 +31,7 @@ from llm4ad.method.moead import MOEAD, MOEADProfiler
 
 load_dotenv()
 
-# --- Cấu hình Maps ---
+# --- Cấu hình Maps (GIỮ NGUYÊN) ---
 algorithm_map = {
     'momcts': (MOMCTS_AHD, MOMCTSProfiler),
     'meoh': (MEoH, MEoHProfiler),
@@ -57,7 +57,6 @@ task_map = {
     "bi_kp_aco": BIKPACOEvaluation(), 
 }
 
-# Danh sách 8 bài toán chạy tuần tự khi chọn 'all'
 SEQUENCE_PROBLEMS = [
     "bi_cvrp_gls",
     "bi_cvrp_aco",
@@ -73,16 +72,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Run LLM4AD Experiment")
     parser.add_argument('--algorithm', type=str, required=True, choices=algorithm_map.keys())
     
-    # Thêm lựa chọn 'all' vào choices
     valid_problems = list(task_map.keys()) + ['all']
-    parser.add_argument('--problem', type=str, required=True, choices=valid_problems,
-                        help="Chọn tên bài toán cụ thể HOẶC chọn 'all' để chạy chuỗi 8 bài.")
+    parser.add_argument('--problem', type=str, required=True, choices=valid_problems)
     
     parser.add_argument('--api_key', type=str, default=None, required=False, 
                         help='Mistral API Keys separated by comma')
     
     parser.add_argument('--key_index', type=int, default=-1, required=False,
-                        help='Index of the API key to use. 0=API_KEY1, 1=API_KEY3, 2=API_KEY4. Default -1 (use all).')
+                        help='Index of the API key to use. Default -1 (use all).')
     
     parser.add_argument('--version', type=str, required=True, choices=['v1', 'v2', 'v3'])
     return parser.parse_args()
@@ -129,7 +126,7 @@ if __name__ == '__main__':
         final_keys_to_use = full_key_list
         print(f"-> Using all {len(final_keys_to_use)} keys.")
 
-    # 2. XÁC ĐỊNH DANH SÁCH BÀI TOÁN CẦN CHẠY
+    # 2. XÁC ĐỊNH BÀI TOÁN
     problems_to_run = []
     if args.problem == 'all':
         problems_to_run = SEQUENCE_PROBLEMS
@@ -148,13 +145,15 @@ if __name__ == '__main__':
         print(f"STARTING TASK {i+1}/{len(problems_to_run)}: {p_name}")
         print("="*50)
         
-        # Cấu hình đường dẫn log riêng cho từng bài
-        # Log sẽ nằm ở: logs/eoh/bi_cvrp_gls/...
+        # --- FIX LỖI NAME ERROR: Khởi tạo biến trước ---
+        method = None
+        llm = None
+        # -----------------------------------------------
+
         log_dir = f'logs/{ALGORITHM_NAME}/{p_name}'
         exact_log_dir_name = f"nhv_runtime_reflection/{VERSION}"
 
         try:
-            # Init API Client (Re-init mỗi vòng để đảm bảo sạch sẽ)
             llm = MistralApi(
                 keys=final_keys_to_use,
                 model='codestral-latest',
@@ -163,7 +162,6 @@ if __name__ == '__main__':
 
             TaskClass = task_map[p_name]
             
-            # Init Method
             method = MethodClass(
                 llm=llm,
                 llm_cluster=llm,
@@ -172,7 +170,7 @@ if __name__ == '__main__':
                     log_style='complex', 
                     result_folder=exact_log_dir_name
                 ),
-                evaluation=TaskClass, # Task instance
+                evaluation=TaskClass,
                 max_sample_nums=305, 
                 max_generations=31,
                 pop_size=10, 
@@ -182,18 +180,20 @@ if __name__ == '__main__':
                 review=True     
             )
             
-            # Run
             method.run()
             print(f">>> FINISHED TASK: {p_name}")
 
         except Exception as e:
             print(f"!!! CRITICAL ERROR in task {p_name}: {e}")
-            # Tùy chọn: continue để chạy bài tiếp theo dù bài này lỗi
+            # Nếu muốn lỗi bài nào bỏ qua bài đó để chạy tiếp bài sau thì uncomment dòng dưới:
             # continue 
         
-        # Dọn dẹp bộ nhớ sau mỗi bài toán
-        del method
-        del llm
+        # --- FIX LỖI NAME ERROR: Kiểm tra trước khi xóa ---
+        if method is not None:
+            del method
+        if llm is not None:
+            del llm
+            
         gc.collect() 
         print(f">>> Cleaned up memory. Moving to next task...")
 
