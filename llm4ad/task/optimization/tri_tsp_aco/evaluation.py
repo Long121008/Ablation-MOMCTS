@@ -12,7 +12,7 @@ from llm4ad.task.optimization.tri_tsp_aco.template import (
     task_description,
 )
 
-__all__ = ["TSPACOEvaluation"]
+__all__ = ["TRITSPACOEvaluation"]
 
 
 # --------------------------------------------------
@@ -153,7 +153,7 @@ def evaluate_aco(
 # Evaluation class
 # --------------------------------------------------
 
-class TSPACOEvaluation(Evaluation):
+class TRITSPACOEvaluation(Evaluation):
     """
     Evaluation for Tri-objective TSP using Ant Colony Optimization (ACO)
     """

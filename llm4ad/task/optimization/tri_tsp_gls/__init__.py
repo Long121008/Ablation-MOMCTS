@@ -1,2 +1,2 @@
-from .evaluation import TSPGLSEvaluation
+from .evaluation import TRITSPGLSEvaluation
 from .template import template_program

@@ -1,2 +1,2 @@
-from .evaluation import TSPACOEvaluation
+from .evaluation import TRITSPACOEvaluation
 from .template import template_program

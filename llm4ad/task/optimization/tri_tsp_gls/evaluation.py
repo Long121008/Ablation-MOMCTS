@@ -12,7 +12,7 @@ from llm4ad.task.optimization.tri_tsp_gls.template import (
     task_description,
 )
 
-__all__ = ["TSPGLSEvaluation"]
+__all__ = ["TRITSPGLSEvaluation"]
 
 
 # --------------------------------------------------
@@ -155,7 +155,7 @@ def evaluate_gls(
 # Evaluation class
 # --------------------------------------------------
 
-class TSPGLSEvaluation(Evaluation):
+class TRITSPGLSEvaluation(Evaluation):
     """
     Evaluation for Tri-objective TSP using Guided Local Search (GLS)
     """
