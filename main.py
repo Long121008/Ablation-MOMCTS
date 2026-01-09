@@ -63,7 +63,7 @@ SEQUENCE_PROBLEMS = [
     "bi_tsp_aco",
     "bi_tsp_gls",
     "bi_kp_gls",
-    "bi_kp_aco",
+    "bi_kp_aco"
 ]
 
 def parse_arguments():
