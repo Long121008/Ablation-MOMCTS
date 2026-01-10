@@ -58,12 +58,12 @@ task_map = {
 }
 
 SEQUENCE_PROBLEMS = [
-    "tri_tsp_gls",
-    "tri_tsp_aco",
     "bi_tsp_aco",
     "bi_tsp_gls",
     "bi_cvrp_gls",
-    "bi_cvrp_aco"
+    "bi_cvrp_aco",
+    "tri_tsp_gls",
+    "tri_tsp_aco",
     "bi_kp_gls",
     "bi_kp_aco"
 ]
