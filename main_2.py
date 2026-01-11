@@ -86,7 +86,7 @@ def parse_arguments():
 
 def get_kaggle_keys_list():
     found_keys = []
-    target_secret_names = ["API_KEY1", "API_KEY3", "API_KEY4"]
+    target_secret_names = ["API_KEY1", "API_KEY3", "API_KEY4", "API_KEY5", "API_KEY6"]
     try:
         from kaggle_secrets import UserSecretsClient
         user_secrets = UserSecretsClient()
