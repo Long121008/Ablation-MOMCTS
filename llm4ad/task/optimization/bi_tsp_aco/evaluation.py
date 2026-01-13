@@ -125,7 +125,7 @@ class TSPACOEvaluation(Evaluation):
         )
 
         self.n_instance = 20
-        self.problem_size = 20
+        self.problem_size = 100
 
         data_gen = GetData(self.n_instance, self.problem_size)
         self._datasets = data_gen.generate_instances()
