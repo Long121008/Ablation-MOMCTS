@@ -177,8 +177,8 @@ if __name__ == '__main__':
                 max_sample_nums=305, 
                 max_generations=31,
                 pop_size=10, 
-                num_samplers=4,
-                num_evaluators=4,
+                num_samplers=2,
+                num_evaluators=2,
                 selection_num=2,
                 review=True     
             )
