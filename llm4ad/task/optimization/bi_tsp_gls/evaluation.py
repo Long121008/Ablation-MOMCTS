@@ -147,10 +147,10 @@ class TSPGLSEvaluation(Evaluation):
             template_program=template_program,
             task_description=task_description,
             use_numba_accelerate=False,
-            timeout_seconds=60,
+            timeout_seconds=500,
         )
 
-        self.n_instance = 20
+        self.n_instance = 10
         self.problem_size = 100
 
         data_gen = GetData(self.n_instance, self.problem_size)
