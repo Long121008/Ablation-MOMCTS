@@ -58,11 +58,14 @@ task_map = {
 }
 
 SEQUENCE_PROBLEMS = [
-    "bi_tsp_aco",
-    "bi_tsp_gls",
     "tri_tsp_gls",
     "tri_tsp_aco",
-    "bi_kp_gls"
+    "bi_tsp_aco",
+    "bi_tsp_gls",
+    "bi_cvrp_gls",
+    "bi_cvrp_aco",
+    "bi_kp_gls",
+    "bi_kp_aco"
 ]
 
 def parse_arguments():
@@ -83,7 +86,7 @@ def parse_arguments():
 
 def get_kaggle_keys_list():
     found_keys = []
-    target_secret_names = ["API_KEY1", "API_KEY3", "API_KEY4","API_KEY5"]
+    target_secret_names = ["API_KEY1", "API_KEY3", "API_KEY4", "API_KEY5", "API_KEY6"]
     try:
         from kaggle_secrets import UserSecretsClient
         user_secrets = UserSecretsClient()
@@ -150,7 +153,7 @@ if __name__ == '__main__':
         llm = None
 
         log_dir = f'logs/{ALGORITHM_NAME}/{p_name}'
-        exact_log_dir_name = f"nhv_runtime_reflection/{VERSION}"
+        exact_log_dir_name = f"nhv_runtime_reflection_tsp_aco/s20/{VERSION}"
 
         try:
             # FIX LỖI: Truyền thẳng String vào api_key, không dùng list
@@ -174,8 +177,8 @@ if __name__ == '__main__':
                 max_sample_nums=305, 
                 max_generations=31,
                 pop_size=10, 
-                num_samplers=4,
-                num_evaluators=4,
+                num_samplers=2,
+                num_evaluators=2,
                 selection_num=2,
                 review=True     
             )
