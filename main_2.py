@@ -153,7 +153,7 @@ if __name__ == '__main__':
         llm = None
 
         log_dir = f'logs/{ALGORITHM_NAME}/{p_name}'
-        exact_log_dir_name = f"nhv_runtime_reflection_tsp_aco/s100/{VERSION}"
+        exact_log_dir_name = f"nhv_runtime_reflection_tsp_aco/s200/{VERSION}"
 
         try:
             # FIX LỖI: Truyền thẳng String vào api_key, không dùng list
