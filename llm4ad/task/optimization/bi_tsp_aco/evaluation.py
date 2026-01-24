@@ -121,7 +121,7 @@ class TSPACOEvaluation(Evaluation):
             template_program=template_program,
             task_description=task_description,
             use_numba_accelerate=False,
-            timeout_seconds=500,
+            timeout_seconds=800,
         )
 
         self.n_instance = 10
